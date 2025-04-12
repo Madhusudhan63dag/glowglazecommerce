@@ -1,0 +1,5 @@
+@import '../utils/font/stylesheet.css';
+
+:root {
+  --font-axiforma: 'Axiforma', sans-serif;
+}
