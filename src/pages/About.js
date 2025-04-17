@@ -313,48 +313,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Team */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Meet Our Leadership</h2>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="w-40 h-40 rounded-full mx-auto mb-4 overflow-hidden bg-gray-200">
-                <img src="https://placehold.co/300x300/e3f2fd/1e88e5?text=Dr.+Sharma" alt="Dr. Rakesh Sharma" className="w-full h-full object-cover" />
-              </div>
-              <h3 className="font-bold text-xl mb-1">Dr. Rakesh Sharma</h3>
-              <p className="text-blue-600 mb-3">Founder & Chief Formulator</p>
-              <p className="text-gray-700">
-                With 25+ years of experience in Ayurvedic medicine and modern healthcare integration.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-40 h-40 rounded-full mx-auto mb-4 overflow-hidden bg-gray-200">
-                <img src="https://placehold.co/300x300/e8f5e9/43a047?text=Dr.+Patel" alt="Dr. Meera Patel" className="w-full h-full object-cover" />
-              </div>
-              <h3 className="font-bold text-xl mb-1">Dr. Meera Patel</h3>
-              <p className="text-blue-600 mb-3">Director of Research</p>
-              <p className="text-gray-700">
-                Leads our team in combining traditional knowledge with modern scientific research.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-40 h-40 rounded-full mx-auto mb-4 overflow-hidden bg-gray-200">
-                <img src="https://placehold.co/300x300/fff3e0/ff9800?text=Raj+Kumar" alt="Raj Kumar" className="w-full h-full object-cover" />
-              </div>
-              <h3 className="font-bold text-xl mb-1">Raj Kumar</h3>
-              <p className="text-blue-600 mb-3">CEO</p>
-              <p className="text-gray-700">
-                Vision-driven leader with expertise in scaling wellness brands and sustainable business practices.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Contact CTA */}
       <section className="py-16 bg-gradient-to-r from-green-600 to-blue-500 text-white">
         <div className="container mx-auto px-4 text-center">
@@ -363,9 +321,11 @@ const About = () => {
             Have questions about our products or want to learn more about our journey? 
             Our team is here to help you find the right wellness solutions.
           </p>
+          <a href='/contact'>
           <button className="bg-white text-green-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-md">
-            Contact Our Team
+            Contact Us
           </button>
+          </a>
         </div>
       </section>
     </div>

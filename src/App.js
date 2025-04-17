@@ -19,6 +19,7 @@ import Trendpage from './pages/Trendpage';
 import Shipping from './pages/Shipping';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import Auth from './components/Auth';
 
 // Import Cart Context
 import { CartProvider } from './context/CartContext';
@@ -40,7 +41,7 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/faq" element={<Faq />} />
-              <Route path="/shipping" element={<Shipping />} />
+              <Route path="/shipping" element={<Auth />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/checkout" element={<Checkout />} />

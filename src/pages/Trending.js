@@ -303,6 +303,65 @@ const Trending = () => {
           </div>
         )}
         
+        {/* Enhanced Ayurvedic benefits section */}
+        {selectedTrendingData && selectedTrendingData.benefits && (
+          <div className="px-4 mb-10">
+            <div className="relative bg-gradient-to-r from-green-50 to-blue-50 rounded-xl overflow-hidden border border-gray-100">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-green-100 rounded-full -mr-32 -mt-32 opacity-20"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-100 rounded-full -ml-32 -mb-32 opacity-20"></div>
+              
+              <div className="relative z-10 p-8">
+                <h3 className="text-3xl font-bold text-center mb-8 text-gray-800">
+                  {selectedTrendingData.benefits.title}
+                </h3>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {selectedTrendingData.benefits.points.map((point, index) => {
+                    // Map benefit titles to relevant images
+                    const imageMap = {
+                      "Natural & Pure": "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+                      "Clinically Tested": "https://images.unsplash.com/photo-1584362917165-526a968579e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+                      "Holistic Health": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+                      "Prevents Fat Accumulation": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+                    };
+                    
+                    const imageUrl = imageMap[point.title] || `https://source.unsplash.com/300x300/?${encodeURIComponent(point.title.toLowerCase())}`;
+                    
+                    return (
+                      <div 
+                        key={index} 
+                        className="flex bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+                      >
+                        <div className="flex-shrink-0 mr-5">
+                          <div className="w-24 h-24 rounded-lg overflow-hidden">
+                            <img 
+                              src={imageUrl} 
+                              alt={point.title}
+                              className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex-grow">
+                          <h4 className="font-bold text-lg mb-2 text-green-800">{point.title}</h4>
+                          <p className="text-gray-700 leading-relaxed">{point.description}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                <div className="mt-8 text-center">
+                  <a href='/about'>
+                  <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors shadow-sm hover:shadow-md font-medium">
+                    Know More About Us
+                  </button>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {!selectedTrendingData && selectedCategory !== 'all' && (
           <div className="px-4 mb-6">
             <h3 className="text-xl font-semibold mb-2">

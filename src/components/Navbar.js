@@ -100,12 +100,11 @@ const Navbar = () => {
       <div className="w-full bg-[#37abc8] py-2 px-4">
         <div className="container mx-auto flex justify-center items-center relative">
           <div className="flex items-center gap-2 text-white">
-            <Box size={20} className="hidden sm:block" />
-            <p className="font-extrabold text-xs sm:text-base text-center">FREE SHIPPING on orders over $59!</p>
+            <p className="font-extrabold text-xs sm:text-base text-center">Subscribe to our <a className='text-red-600 cursor-pointer' href="https://www.youtube.com/@glowglaz"> YouTube </a> — because your health deserves next-level secrets and surprises.</p>
           </div>
-          <button className="text-white font-bold text-xs sm:text-sm hover:opacity-80 absolute right-2 sm:right-0">
-            Français
-          </button>
+          <a href='https://www.youtube.com/@glowglaz' target="_blank" rel="noopener noreferrer" className="font-bold text-xs sm:text-sm absolute right-2 sm:right-0 px-3 py-1 rounded-md bg-gradient-to-r from-red-600 via-red-500 to-red-700 hover:from-red-700 hover:via-red-500 hover:to-red-600 text-white animate-pulse transition-all duration-500 shadow-md">
+            Subscribe
+          </a>
         </div>
       </div>
 
@@ -262,7 +261,7 @@ const Navbar = () => {
               {/* Action Buttons */}
               <div className="flex items-center gap-1 sm:gap-2">
                 <button className="p-1.5 sm:p-2 text-white bg-green-600 hover:bg-white hover:text-green-600 rounded-full sm:rounded-2xl">
-                <a href='https://www.youtube.com/@glowglaze' target="_blank" rel="noopener noreferrer">
+                <a href='https://www.youtube.com/@glowglaz' target="_blank" rel="noopener noreferrer">
                   <Youtube size={30} className="" />
                 </a>
                 </button>
@@ -314,7 +313,7 @@ const Navbar = () => {
                       onClick={() => handleSuggestionClick(suggestion)}
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
                     >
-                      <div className="w-8 h-8 mr-2">
+                      <div className="w-8 h-8 mr-2">FLYELITE
                         <img 
                           src={suggestion.url || suggestion.imageUrl} 
                           alt={suggestion.title} 

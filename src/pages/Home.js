@@ -400,7 +400,7 @@ const Home = () => {
       </section>
 
       <section className="container mx-auto py-10 relative">
-        <h1 className="text-center font-bold text-4xl mb-6">Shop by Diet</h1>
+        <h1 className="text-center font-bold text-4xl mb-6">Global Standards, Trusted Quality</h1>
 
         <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-4">
           <button

@@ -160,8 +160,29 @@ const trendingpage = [
     {
     "id": 1,
     "title": "Ayurvedic Medicine",
-    "description": "An Ayurvedic formulation designed to aid in weight management by promoting the reduction of excess fat tissues and preventing their accumulation. Clinically tested and recommended by various practitioners.",
+    "description": "Embrace a balanced lifestyle with our Ayurvedic formulation—your natural ally in reducing excess fat and preventing new accumulation. Clinically tested and trusted by healthcare practitioners, this unique blend harnesses time-honored Ayurvedic wisdom to support your journey toward a healthier you.",
     "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
+    "benefits": {
+      "title": "Why Choose Our Ayurvedic Formulation",
+      "points": [
+        {
+          "title": "Natural & Pure",
+          "description": "Crafted with a potent blend of traditional herbs, each ingredient is carefully selected to ensure maximum efficacy without harmful chemicals or artificial additives."
+        },
+        {
+          "title": "Clinically Tested",
+          "description": "Our formulation has undergone rigorous clinical testing and is recommended by various practitioners, affirming its safety and effectiveness."
+        },
+        {
+          "title": "Holistic Health",
+          "description": "Not only does it help reduce stubborn fat tissues, but it also supports overall wellness by promoting healthy digestion, boosting metabolism, and enhancing energy levels."
+        },
+        {
+          "title": "Prevents Fat Accumulation",
+          "description": "By targeting the root causes of fat buildup, our formula helps prevent further accumulation, giving you the confidence to lead an active, vibrant life."
+        }
+      ]
+    },
     "products": [
       { "id": 1, "title": "Sampoorn Arogya", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 3990 },
       { "id": 2, "title": "Dr. Joints", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 3990 },

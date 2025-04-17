@@ -1,49 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaLock, FaShippingFast, FaCreditCard, FaArrowLeft, FaCheckCircle, FaShieldAlt, FaMedal, FaRegCreditCard } from 'react-icons/fa';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FaShoppingCart, FaLock, FaShippingFast, FaCreditCard, FaArrowLeft, FaCheckCircle, FaShieldAlt, FaMedal, FaRegCreditCard, FaYoutube } from 'react-icons/fa';
 
-// Add backend API URL
-const API_URL = process.env.REACT_APP_API_URL || 'https://razorpaybackend-wgbh.onrender.com';
+// Add backend API URL - Fixed to properly use environment variables or fallback
+const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://razorpaybackend-wgbh.onrender.com' : 'http://localhost:5000');
+// Add YouTube OAuth credentials - Updated to use OAuth 2.0 with proper Google Identity Services
+const YOUTUBE_CLIENT_ID = process.env.REACT_APP_YOUTUBE_CLIENT_ID || '672880894908-nlo53e5cevqpvc1r1j45s3h8mr8a7fdu.apps.googleusercontent.com';
+const YOUTUBE_CHANNEL_ID = 'UCZk0XVMUcmhAGf0L-V9rUxA'; // Your YouTube channel ID
+// Development verification code - should match backend DEV_VERIFICATION_CODE
+const DEV_VERIFICATION_CODE = 'devtest123';
 
 const Checkout = () => {
   const { cart, cartTotal, formatPrice, clearCart } = useCart();
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(1);
-  const [formData, setFormData] = useState({
-    // Shipping information
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-    // Payment information
-    cardName: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-  });
+  const location = useLocation();
+
+  // Get user data from location state or localStorage
+  const getUserData = () => {
+    if (location.state && location.state.formData) {
+      return location.state.formData;
+    }
+    
+    // Try to get from localStorage as fallback
+    const pendingCheckout = localStorage.getItem('pendingCheckout');
+    if (pendingCheckout) {
+      try {
+        const { formData } = JSON.parse(pendingCheckout);
+        return formData || {};
+      } catch (error) {
+        console.error('Error parsing saved checkout data', error);
+      }
+    }
+    
+    return {};
+  };
+  
+  const [formData, setFormData] = useState(getUserData);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [errors, setErrors] = useState({});
   
-  // Add new state variables for Razorpay integration
+  // Credit card form data
+  const [cardData, setCardData] = useState({
+    cardName: '',
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+  });
+  
+  // Razorpay integration states
   const [razorpayOrder, setRazorpayOrder] = useState(null);
   const [razorpayKeyId, setRazorpayKeyId] = useState('');
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [orderReference, setOrderReference] = useState('');
   const [paymentId, setPaymentId] = useState('');
 
-  // Redirect to home if cart is empty
+  // Add states for YouTube subscription verification
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [verifyingSubscription, setVerifyingSubscription] = useState(false);
+  const [subscriptionError, setSubscriptionError] = useState('');
+  const [discountApplied, setDiscountApplied] = useState(false);
+
+  // Redirect if no shipping information
   useEffect(() => {
     if (cart.length === 0 && !orderComplete) {
       navigate('/');
+      return;
     }
-  }, [cart, navigate, orderComplete]);
+    
+    // If we don't have user data, redirect to auth/shipping page
+    if (!formData || Object.keys(formData).length === 0 || !formData.email) {
+      navigate('/shipping');
+    }
+  }, [cart, navigate, orderComplete, formData]);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -66,7 +97,7 @@ const Checkout = () => {
       const pendingCheckout = localStorage.getItem('pendingCheckout');
       
       // If checkout is not complete and user has entered email, send abandoned cart email
-      if (!orderComplete && formData.email && pendingCheckout && activeStep >= 1) {
+      if (!orderComplete && formData.email && pendingCheckout) {
         sendAbandonedCartEmail();
       }
       
@@ -92,9 +123,47 @@ const Checkout = () => {
     });
   };
 
-  const handleChange = (e) => {
+  // Initialize using modern Google Identity Services
+  useEffect(() => {
+    console.log('Initializing Google Identity Services...');
+    
+    const loadGoogleIdentityServices = () => {
+      return new Promise((resolve, reject) => {
+        // Check if script is already loaded
+        if (document.getElementById('google-identity-script')) {
+          console.log('Google Identity script already loaded');
+          resolve(true);
+          return;
+        }
+        
+        // Load the Google Identity script
+        const script = document.createElement('script');
+        script.id = 'google-identity-script';
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        
+        script.onload = () => {
+          console.log('Google Identity Services script loaded successfully');
+          resolve(true);
+        };
+        
+        script.onerror = (error) => {
+          console.error('Error loading Google Identity Services script:', error);
+          reject(error);
+        };
+        
+        document.body.appendChild(script);
+      });
+    };
+    
+    loadGoogleIdentityServices()
+      .catch(error => console.error('Failed to load Google Identity Services:', error));
+  }, []);
+
+  const handleCardDataChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setCardData(prev => ({
       ...prev,
       [name]: value
     }));
@@ -108,39 +177,24 @@ const Checkout = () => {
     }
   };
 
-  const validateForm = () => {
+  const validatePaymentForm = () => {
     const newErrors = {};
     
-    // Validate based on active step
-    if (activeStep === 1) {
-      if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-      if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-      if (!formData.email.trim()) {
-        newErrors.email = 'Email is required';
-      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        newErrors.email = 'Email address is invalid';
-      }
-      if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
-      if (!formData.address.trim()) newErrors.address = 'Address is required';
-      if (!formData.city.trim()) newErrors.city = 'City is required';
-      if (!formData.state.trim()) newErrors.state = 'State is required';
-      if (!formData.pincode.trim()) newErrors.pincode = 'Pincode is required';
-    } 
-    else if (activeStep === 2 && paymentMethod === 'card') {
-      if (!formData.cardName.trim()) newErrors.cardName = 'Name on card is required';
-      if (!formData.cardNumber.trim()) {
+    if (paymentMethod === 'card') {
+      if (!cardData.cardName.trim()) newErrors.cardName = 'Name on card is required';
+      if (!cardData.cardNumber.trim()) {
         newErrors.cardNumber = 'Card number is required';
-      } else if (!/^\d{16}$/.test(formData.cardNumber.replace(/\s/g, ''))) {
+      } else if (!/^\d{16}$/.test(cardData.cardNumber.replace(/\s/g, ''))) {
         newErrors.cardNumber = 'Invalid card number';
       }
-      if (!formData.expiryDate.trim()) {
+      if (!cardData.expiryDate.trim()) {
         newErrors.expiryDate = 'Expiry date is required';
-      } else if (!/^\d{2}\/\d{2}$/.test(formData.expiryDate)) {
+      } else if (!/^\d{2}\/\d{2}$/.test(cardData.expiryDate)) {
         newErrors.expiryDate = 'Use format MM/YY';
       }
-      if (!formData.cvv.trim()) {
+      if (!cardData.cvv.trim()) {
         newErrors.cvv = 'CVV is required';
-      } else if (!/^\d{3,4}$/.test(formData.cvv)) {
+      } else if (!/^\d{3,4}$/.test(cardData.cvv)) {
         newErrors.cvv = 'Invalid CVV';
       }
     }
@@ -149,16 +203,100 @@ const Checkout = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const nextStep = () => {
-    if (validateForm()) {
-      setActiveStep(activeStep + 1);
-      window.scrollTo(0, 0);
-    }
-  };
+  // Handle YouTube authentication and subscription verification
+  const handleVerifyYoutubeSubscription = async () => {
+    setVerifyingSubscription(true);
+    setSubscriptionError('');
+    
+    try {
+      // Development mode for testing (remove in production)
+      const isDev = process.env.NODE_ENV === 'development';
+      if (isDev) {
+        console.log('Using development mode verification');
+        // Add dev mode bypass for testing
+        const response = await fetch(`${API_URL}/verify-youtube-subscription`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            devMode: true,
+            verificationCode: DEV_VERIFICATION_CODE,
+          }),
+        });
+        
+        const data = await response.json();
+        console.log('Development mode verification response:', data);
+        
+        if (data.success && data.isSubscribed) {
+          setIsSubscribed(true);
+          setDiscountApplied(true);
+          setVerifyingSubscription(false);
+          return;
+        }
+      }
 
-  const prevStep = () => {
-    setActiveStep(activeStep - 1);
-    window.scrollTo(0, 0);
+      // Regular flow for production using Google Identity Services
+      if (!window.google) {
+        console.error("Google Identity Services not loaded");
+        setSubscriptionError("Authentication service not available. Please try again later.");
+        setVerifyingSubscription(false);
+        return;
+      }
+      
+      // Use the new Google Identity OAuth2 flow
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: YOUTUBE_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/youtube.readonly',
+        callback: async (tokenResponse) => {
+          if (tokenResponse.error) {
+            console.error('Google OAuth error:', tokenResponse);
+            setSubscriptionError('Authentication failed. Please try again.');
+            setVerifyingSubscription(false);
+            return;
+          }
+          
+          // Got the access token
+          const accessToken = tokenResponse.access_token;
+          
+          try {
+            // Call backend to verify subscription
+            const response = await fetch(`${API_URL}/verify-youtube-subscription`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                accessToken,
+                channelId: YOUTUBE_CHANNEL_ID,
+              }),
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.isSubscribed) {
+              setIsSubscribed(true);
+              setDiscountApplied(true);
+            } else {
+              setSubscriptionError(data.message || 'Not subscribed to the channel. Subscribe to get a 10% discount!');
+            }
+          } catch (error) {
+            console.error('Error verifying subscription with backend:', error);
+            setSubscriptionError('Failed to verify subscription. Please try again.');
+          } finally {
+            setVerifyingSubscription(false);
+          }
+        },
+      });
+      
+      // Request the access token
+      client.requestAccessToken();
+      
+    } catch (error) {
+      console.error('Error in YouTube verification process:', error);
+      setSubscriptionError('Failed to verify subscription. Please try again.');
+      setVerifyingSubscription(false);
+    }
   };
 
   // Create Razorpay order
@@ -298,7 +436,8 @@ const Checkout = () => {
         totalAmount: orderTotal,
         currency: '₹',
         paymentMethod: paymentMethod === 'razorpay' ? 'Razorpay' : (paymentMethod === 'card' ? 'Credit Card' : 'Cash on Delivery'),
-        paymentId: paymentId || 'COD'
+        paymentId: paymentId || 'COD',
+        discount: discountApplied ? '10% YouTube Subscriber Discount' : 'No discount applied'
       };
       
       const customerDetails = {
@@ -461,7 +600,7 @@ const Checkout = () => {
   const handleSubmitOrder = async (e) => {
     e.preventDefault();
     
-    if (validateForm()) {
+    if (validatePaymentForm()) {
       setIsSubmitting(true);
       
       // Simple API check without AbortController
@@ -526,7 +665,12 @@ const Checkout = () => {
 
   // Calculate shipping cost and total
   const shippingCost = cartTotal > 3000 ? 0 : 99;
-  const orderTotal = cartTotal + shippingCost;
+  
+  // Calculate discount if applied
+  const discountAmount = discountApplied ? (cartTotal * 0.1) : 0;
+  
+  // Update order total with discount
+  const orderTotal = cartTotal + shippingCost - discountAmount;
   
   // Calculate estimated delivery date (5-7 days from now)
   const getDeliveryDateRange = () => {
@@ -595,13 +739,13 @@ const Checkout = () => {
         <div className="container mx-auto py-4 px-4">
           <div className="flex items-center justify-between">
             <button 
-              onClick={() => navigate(-1)} 
+              onClick={() => navigate('/shipping')} 
               className="flex items-center text-gray-600 hover:text-gray-800"
             >
               <FaArrowLeft className="mr-2" />
-              <span>Back</span>
+              <span>Back to Shipping</span>
             </button>
-            <h1 className="text-xl font-bold text-center">Checkout</h1>
+            <h1 className="text-xl font-bold text-center">Payment</h1>
             <div></div> {/* Empty div for flex alignment */}
           </div>
         </div>
@@ -611,22 +755,22 @@ const Checkout = () => {
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center max-w-2xl mx-auto">
-            <div className={`flex flex-col items-center ${activeStep >= 1 ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${activeStep >= 1 ? 'bg-green-100' : 'bg-gray-100'}`}>
+            <div className="flex flex-col items-center text-green-600">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
                 <FaShoppingCart />
               </div>
               <span className="text-xs mt-1">Cart</span>
             </div>
-            <div className={`flex-1 h-1 mx-2 ${activeStep >= 2 ? 'bg-green-400' : 'bg-gray-200'}`}></div>
-            <div className={`flex flex-col items-center ${activeStep >= 2 ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${activeStep >= 2 ? 'bg-green-100' : 'bg-gray-100'}`}>
+            <div className="flex-1 h-1 mx-2 bg-green-400"></div>
+            <div className="flex flex-col items-center text-green-600">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
                 <FaShippingFast />
               </div>
               <span className="text-xs mt-1">Shipping</span>
             </div>
-            <div className={`flex-1 h-1 mx-2 ${activeStep >= 3 ? 'bg-green-400' : 'bg-gray-200'}`}></div>
-            <div className={`flex flex-col items-center ${activeStep >= 3 ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${activeStep >= 3 ? 'bg-green-100' : 'bg-gray-100'}`}>
+            <div className="flex-1 h-1 mx-2 bg-green-400"></div>
+            <div className="flex flex-col items-center text-green-600">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
                 <FaCreditCard />
               </div>
               <span className="text-xs mt-1">Payment</span>
@@ -663,365 +807,269 @@ const Checkout = () => {
               </div>
               <div>
                 <h3 className="font-medium text-sm">Free Shipping</h3>
-                <p className="text-xs text-gray-500">On orders over ₹1,000</p>
+                <p className="text-xs text-gray-500">On orders over ₹3,000</p>
               </div>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Main Checkout Form */}
+          {/* Main Payment Form */}
           <div className="lg:w-2/3">
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              {activeStep === 1 && (
-                <>
-                  <h2 className="text-xl font-semibold mb-6">Shipping Information</h2>
-                  <form className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                        <input
-                          type="text"
-                          id="firstName"
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={handleChange}
-                          className={`w-full border ${errors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                        />
-                        {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
-                      </div>
-                      <div>
-                        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                        <input
-                          type="text"
-                          id="lastName"
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleChange}
-                          className={`w-full border ${errors.lastName ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                        />
-                        {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                        <input
-                          type="email"
-                          id="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                        />
-                        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-                      </div>
-                      <div>
-                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                        <input
-                          type="tel"
-                          id="phone"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          className={`w-full border ${errors.phone ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                        />
-                        {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                      <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        className={`w-full border ${errors.address ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                      />
-                      {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div>
-                        <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                        <input
-                          type="text"
-                          id="city"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleChange}
-                          className={`w-full border ${errors.city ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                        />
-                        {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
-                      </div>
-                      <div>
-                        <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                        <input
-                          type="text"
-                          id="state"
-                          name="state"
-                          value={formData.state}
-                          onChange={handleChange}
-                          className={`w-full border ${errors.state ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                        />
-                        {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
-                      </div>
-                      <div>
-                        <label htmlFor="pincode" className="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
-                        <input
-                          type="text"
-                          id="pincode"
-                          name="pincode"
-                          value={formData.pincode}
-                          onChange={handleChange}
-                          className={`w-full border ${errors.pincode ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                        />
-                        {errors.pincode && <p className="text-red-500 text-xs mt-1">{errors.pincode}</p>}
-                      </div>
-                    </div>
-                  </form>
-                  <div className="mt-6 flex justify-end">
-                    <button 
-                      onClick={nextStep}
-                      className="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition-colors"
-                    >
-                      Continue to Payment
-                    </button>
+            {/* YouTube Subscription Discount Section - NEW */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-red-600">
+              <div className="flex items-center mb-4">
+                <FaYoutube className="text-red-600 text-2xl mr-3" />
+                <h2 className="text-xl font-semibold">Get 10% Off with YouTube Subscription</h2>
+              </div>
+              
+              <p className="text-gray-700 mb-4">
+                Subscribe to our YouTube channel and get an instant 10% discount on your order!
+              </p>
+              
+              {discountApplied ? (
+                <div className="bg-green-50 border border-green-200 rounded-md p-4 flex items-start">
+                  <FaCheckCircle className="text-green-600 mt-0.5 mr-2 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-green-700">YouTube Subscription Verified!</p>
+                    <p className="text-sm text-green-600">10% discount has been applied to your order.</p>
                   </div>
-                </>
-              )}
-
-              {activeStep === 2 && (
-                <>
-                  <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
-                  <div className="space-y-4">
-                    <div className="flex flex-col space-y-4">
-                      <label className="flex items-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
-                        <input 
-                          type="radio" 
-                          name="paymentMethod" 
-                          value="card" 
-                          checked={paymentMethod === 'card'} 
-                          onChange={() => setPaymentMethod('card')}
-                          className="h-4 w-4 text-green-600"
-                        />
-                        <span className="ml-2 flex items-center">
-                          <FaCreditCard className="mr-2 text-gray-500" /> 
-                          Credit / Debit Card
-                        </span>
-                      </label>
-                      
-                      {/* Add Razorpay payment option */}
-                      <label className="flex items-center p-4 border border-green-200 bg-green-50 rounded-md cursor-pointer hover:bg-green-100">
-                        <input 
-                          type="radio" 
-                          name="paymentMethod" 
-                          value="razorpay" 
-                          checked={paymentMethod === 'razorpay'} 
-                          onChange={() => setPaymentMethod('razorpay')}
-                          className="h-4 w-4 text-green-600"
-                        />
-                        <span className="ml-2 flex items-center">
-                          <img src="https://razorpay.com/favicon.png" alt="Razorpay" className="w-4 h-4 mr-2" />
-                          Pay with Razorpay (UPI, Cards, NetBanking, Wallets)
-                          <span className="ml-2 px-2 py-1 text-xs bg-green-600 text-white rounded-full">Recommended</span>
-                        </span>
-                      </label>
-                      
-                      <label className="flex items-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
-                        <input 
-                          type="radio" 
-                          name="paymentMethod" 
-                          value="cod" 
-                          checked={paymentMethod === 'cod'} 
-                          onChange={() => setPaymentMethod('cod')}
-                          className="h-4 w-4 text-green-600"
-                        />
-                        <span className="ml-2">Cash on Delivery</span>
-                      </label>
-                    </div>
-                    
-                    {/* Show card form only if card payment method is selected */}
-                    {paymentMethod === 'card' && (
-                      <div className="mt-6 border-t pt-6">
-                        <form className="space-y-4">
-                          <div>
-                            <label htmlFor="cardName" className="block text-sm font-medium text-gray-700 mb-1">Name on Card</label>
-                            <input
-                              type="text"
-                              id="cardName"
-                              name="cardName"
-                              value={formData.cardName}
-                              onChange={handleChange}
-                              className={`w-full border ${errors.cardName ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                            />
-                            {errors.cardName && <p className="text-red-500 text-xs mt-1">{errors.cardName}</p>}
-                          </div>
-                          
-                          <div>
-                            <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
-                            <input
-                              type="text"
-                              id="cardNumber"
-                              name="cardNumber"
-                              value={formData.cardNumber}
-                              onChange={handleChange}
-                              placeholder="1234 5678 9012 3456"
-                              className={`w-full border ${errors.cardNumber ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                            />
-                            {errors.cardNumber && <p className="text-red-500 text-xs mt-1">{errors.cardNumber}</p>}
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
-                              <input
-                                type="text"
-                                id="expiryDate"
-                                name="expiryDate"
-                                value={formData.expiryDate}
-                                onChange={handleChange}
-                                placeholder="MM/YY"
-                                className={`w-full border ${errors.expiryDate ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                              />
-                              {errors.expiryDate && <p className="text-red-500 text-xs mt-1">{errors.expiryDate}</p>}
-                            </div>
-                            <div>
-                              <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">CVV</label>
-                              <input
-                                type="text"
-                                id="cvv"
-                                name="cvv"
-                                value={formData.cvv}
-                                onChange={handleChange}
-                                placeholder="123"
-                                className={`w-full border ${errors.cvv ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                              />
-                              {errors.cvv && <p className="text-red-500 text-xs mt-1">{errors.cvv}</p>}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center text-sm text-gray-500 mt-4">
-                            <FaLock className="mr-2" /> 
-                            Your payment information is secured with SSL encryption
-                          </div>
-                          
-                          {/* Payment Trust Indicators */}
-                          <div className="mt-6 pt-4 border-t">
-                            <div className="flex items-center justify-center mb-4">
-                              <FaLock className="text-green-600 mr-2" />
-                              <span className="text-sm font-medium text-green-600">Secure Payment Processing</span>
-                            </div>
-                            <div className="flex flex-wrap justify-center gap-4">
-                              <img src="https://cdn.iconscout.com/icon/free/png-256/visa-3-226460.png" alt="Visa" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                              <img src="https://cdn.iconscout.com/icon/free/png-256/mastercard-6-226462.png" alt="Mastercard" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                              <img src="https://cdn.iconscout.com/icon/free/png-256/american-express-44503.png" alt="American Express" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                              <img src="https://cdn.iconscout.com/icon/free/png-256/rupay-1446048-1224020.png" alt="RuPay" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                              <img src="https://cdn.iconscout.com/icon/free/png-256/paytm-226448.png" alt="Paytm" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                              <img src="https://cdn.iconscout.com/icon/free/png-256/upi-1804457-1530404.png" alt="UPI" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                            </div>
-                          </div>
-                        </form>
-                      </div>
-                    )}
-                    
-                    {/* Show Razorpay information */}
-                    {paymentMethod === 'razorpay' && (
-                      <div className="mt-6 border-t pt-6">
-                        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
-                          <p className="text-sm text-blue-800">
-                            You will be redirected to Razorpay's secure payment gateway to complete your purchase.
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap gap-3 items-center justify-center">
-                          <img src="https://cdn.razorpay.com/static/assets/logo/upi.svg" alt="UPI" className="h-8" />
-                          <img src="https://cdn.razorpay.com/static/assets/logo/netbanking.svg" alt="Netbanking" className="h-8" />
-                          <img src="https://cdn.razorpay.com/static/assets/logo/card.svg" alt="Card" className="h-8" />
-                          <img src="https://cdn.razorpay.com/static/assets/logo/wallet.svg" alt="Wallet" className="h-8" />
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Show COD information */}
-                    {paymentMethod === 'cod' && (
-                      <div className="mt-6 border-t pt-6">
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                          <p className="text-sm text-yellow-800">
-                            Pay with cash upon delivery. Please note that COD may not be available for all pin codes.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Follow these steps to get your discount:
+                  </p>
+                  <ol className="list-decimal list-inside text-sm text-gray-600 space-y-2 ml-2">
+                    <li>Click the "Verify Subscription" button below</li>
+                    <li>Sign in with your Google account</li>
+                    <li>Make sure you're subscribed to our channel</li>
+                    <li>Your discount will be applied automatically</li>
+                  </ol>
                   
-                  <div className="mt-6 flex justify-between">
-                    <button 
-                      onClick={prevStep}
-                      className="border border-gray-300 text-gray-700 py-2 px-6 rounded-md hover:bg-gray-50 transition-colors"
+                  {subscriptionError && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm text-yellow-800">
+                      {subscriptionError}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center">
+                    <button
+                      onClick={handleVerifyYoutubeSubscription}
+                      disabled={verifyingSubscription}
+                      className="flex items-center bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors"
                     >
-                      Back to Shipping
-                    </button>
-                    <button 
-                      onClick={handleSubmitOrder}
-                      className="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition-colors flex items-center"
-                      disabled={isSubmitting || paymentProcessing}
-                    >
-                      {isSubmitting || paymentProcessing ? (
+                      {verifyingSubscription ? (
                         <>
                           <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          {paymentProcessing ? 'Initializing Payment...' : 'Processing...'}
+                          Verifying...
                         </>
                       ) : (
-                        paymentMethod === 'razorpay' ? 'Pay Now' : 'Place Order'
+                        <>
+                          <FaYoutube className="mr-2" /> Verify Subscription
+                        </>
                       )}
                     </button>
+                    <a 
+                      href={`https://www.youtube.com/channel/${YOUTUBE_CHANNEL_ID}?sub_confirmation=1`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-4 text-sm text-red-600 hover:text-red-800 hover:underline"
+                    >
+                      Go to our channel
+                    </a>
                   </div>
-                </>
+                </div>
               )}
             </div>
-            
-            {/* Trust Badges - Bottom */}
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-              <h3 className="text-center text-sm font-medium text-gray-700 mb-4">Why Shop With Us</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-2">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                    </svg>
-                  </div>
-                  <span className="text-xs font-medium">Authentic Products</span>
+
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
+              <div className="space-y-4">
+                <div className="flex flex-col space-y-4">
+                  <label className="flex items-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      value="card" 
+                      checked={paymentMethod === 'card'} 
+                      onChange={() => setPaymentMethod('card')}
+                      className="h-4 w-4 text-green-600"
+                    />
+                    <span className="ml-2 flex items-center">
+                      <FaCreditCard className="mr-2 text-gray-500" /> 
+                      Credit / Debit Card
+                    </span>
+                  </label>
+                  
+                  {/* Add Razorpay payment option */}
+                  <label className="flex items-center p-4 border border-green-200 bg-green-50 rounded-md cursor-pointer hover:bg-green-100">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      value="razorpay" 
+                      checked={paymentMethod === 'razorpay'} 
+                      onChange={() => setPaymentMethod('razorpay')}
+                      className="h-4 w-4 text-green-600"
+                    />
+                    <span className="ml-2 flex items-center">
+                      <img src="https://razorpay.com/favicon.png" alt="Razorpay" className="w-4 h-4 mr-2" />
+                      Pay with Razorpay (UPI, Cards, NetBanking, Wallets)
+                      <span className="ml-2 px-2 py-1 text-xs bg-green-600 text-white rounded-full">Recommended</span>
+                    </span>
+                  </label>
+                  
+                  <label className="flex items-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      value="cod" 
+                      checked={paymentMethod === 'cod'} 
+                      onChange={() => setPaymentMethod('cod')}
+                      className="h-4 w-4 text-green-600"
+                    />
+                    <span className="ml-2">Cash on Delivery</span>
+                  </label>
                 </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-2">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                    </svg>
+                
+                {/* Show card form only if card payment method is selected */}
+                {paymentMethod === 'card' && (
+                  <div className="mt-6 border-t pt-6">
+                    <form className="space-y-4">
+                      <div>
+                        <label htmlFor="cardName" className="block text-sm font-medium text-gray-700 mb-1">Name on Card</label>
+                        <input
+                          type="text"
+                          id="cardName"
+                          name="cardName"
+                          value={cardData.cardName}
+                          onChange={handleCardDataChange}
+                          className={`w-full border ${errors.cardName ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
+                        />
+                        {errors.cardName && <p className="text-red-500 text-xs mt-1">{errors.cardName}</p>}
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+                        <input
+                          type="text"
+                          id="cardNumber"
+                          name="cardNumber"
+                          value={cardData.cardNumber}
+                          onChange={handleCardDataChange}
+                          placeholder="1234 5678 9012 3456"
+                          className={`w-full border ${errors.cardNumber ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
+                        />
+                        {errors.cardNumber && <p className="text-red-500 text-xs mt-1">{errors.cardNumber}</p>}
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                          <input
+                            type="text"
+                            id="expiryDate"
+                            name="expiryDate"
+                            value={cardData.expiryDate}
+                            onChange={handleCardDataChange}
+                            placeholder="MM/YY"
+                            className={`w-full border ${errors.expiryDate ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
+                          />
+                          {errors.expiryDate && <p className="text-red-500 text-xs mt-1">{errors.expiryDate}</p>}
+                        </div>
+                        <div>
+                          <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                          <input
+                            type="text"
+                            id="cvv"
+                            name="cvv"
+                            value={cardData.cvv}
+                            onChange={handleCardDataChange}
+                            placeholder="123"
+                            className={`w-full border ${errors.cvv ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
+                          />
+                          {errors.cvv && <p className="text-red-500 text-xs mt-1">{errors.cvv}</p>}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center text-sm text-gray-500 mt-4">
+                        <FaLock className="mr-2" /> 
+                        Your payment information is secured with SSL encryption
+                      </div>
+                      
+                      {/* Payment Trust Indicators */}
+                      <div className="mt-6 pt-4 border-t">
+                        <div className="flex items-center justify-center mb-4">
+                          <FaLock className="text-green-600 mr-2" />
+                          <span className="text-sm font-medium text-green-600">Secure Payment Processing</span>
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-4">
+                          <img src="https://cdn.iconscout.com/icon/free/png-256/visa-3-226460.png" alt="Visa" className="h-6 grayscale hover:grayscale-0 transition-all" />
+                          <img src="https://cdn.iconscout.com/icon/free/png-256/mastercard-6-226462.png" alt="Mastercard" className="h-6 grayscale hover:grayscale-0 transition-all" />
+                          <img src="https://cdn.iconscout.com/icon/free/png-256/american-express-44503.png" alt="American Express" className="h-6 grayscale hover:grayscale-0 transition-all" />
+                          <img src="https://cdn.iconscout.com/icon/free/png-256/rupay-1446048-1224020.png" alt="RuPay" className="h-6 grayscale hover:grayscale-0 transition-all" />
+                        </div>
+                      </div>
+                    </form>
                   </div>
-                  <span className="text-xs font-medium">Secure Shopping</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center mb-2">
-                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+                )}
+                
+                {/* Show Razorpay information */}
+                {paymentMethod === 'razorpay' && (
+                  <div className="mt-6 border-t pt-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+                      <p className="text-sm text-blue-800">
+                        You will be redirected to Razorpay's secure payment gateway to complete your purchase.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-3 items-center justify-center">
+                      <img src="https://cdn.razorpay.com/static/assets/logo/upi.svg" alt="UPI" className="h-8" />
+                      <img src="https://cdn.razorpay.com/static/assets/logo/netbanking.svg" alt="Netbanking" className="h-8" />
+                      <img src="https://cdn.razorpay.com/static/assets/logo/card.svg" alt="Card" className="h-8" />
+                      <img src="https://cdn.razorpay.com/static/assets/logo/wallet.svg" alt="Wallet" className="h-8" />
+                    </div>
                   </div>
-                  <span className="text-xs font-medium">Fast Delivery</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-2">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path>
-                    </svg>
+                )}
+                
+                {/* Show COD information */}
+                {paymentMethod === 'cod' && (
+                  <div className="mt-6 border-t pt-6">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                      <p className="text-sm text-yellow-800">
+                        Pay with cash upon delivery. Please note that COD may not be available for all pin codes.
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-xs font-medium">Easy Returns</span>
-                </div>
+                )}
+              </div>
+              
+              <div className="mt-6 flex justify-between">
+                <button 
+                  onClick={() => navigate('/shipping')}
+                  className="border border-gray-300 text-gray-700 py-2 px-6 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Back to Shipping
+                </button>
+                <button 
+                  onClick={handleSubmitOrder}
+                  className="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition-colors flex items-center"
+                  disabled={isSubmitting || paymentProcessing}
+                >
+                  {isSubmitting || paymentProcessing ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {paymentProcessing ? 'Initializing Payment...' : 'Processing...'}
+                    </>
+                  ) : (
+                    paymentMethod === 'razorpay' ? 'Pay Now' : 'Place Order'
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -1063,6 +1111,15 @@ const Checkout = () => {
                   <span className="text-gray-600">Shipping</span>
                   <span>{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
                 </div>
+                
+                {/* Add discount row if applied */}
+                {discountApplied && (
+                  <div className="flex justify-between py-2 text-green-600">
+                    <span>YouTube Discount (10%)</span>
+                    <span>-{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
+                
                 <div className="flex justify-between py-2 font-bold">
                   <span>Total</span>
                   <span>{formatPrice(orderTotal)}</span>
@@ -1074,6 +1131,14 @@ const Checkout = () => {
                     <span>Free shipping applied!</span>
                   </div>
                 )}
+                
+                {/* Add YouTube discount badge if applied */}
+                {discountApplied && (
+                  <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-md flex items-center">
+                    <FaYoutube className="mr-1" />
+                    <span>10% YouTube subscriber discount applied!</span>
+                  </div>
+                )}
               </div>
               
               {/* Trust Seals in Order Summary */}
@@ -1083,9 +1148,9 @@ const Checkout = () => {
                   <span className="text-xs font-medium text-gray-500">PAYMENT METHODS</span>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2 mb-4">
-                  <img src="https://cdn.iconscout.com/icon/free/png-256/visa-3-226460.png" alt="Visa" className="h-20" />
-                  <img src="https://cdn.iconscout.com/icon/free/png-256/mastercard-6-226462.png" alt="Mastercard" className="h-20" />
-                  <img src="https://cdn.iconscout.com/icon/free/png-256/american-express-44503.png" alt="Amex" className="h-20" />
+                  <img src="https://cdn.iconscout.com/icon/free/png-256/visa-3-226460.png" alt="Visa" className="h-8" />
+                  <img src="https://cdn.iconscout.com/icon/free/png-256/mastercard-6-226462.png" alt="Mastercard" className="h-8" />
+                  <img src="https://cdn.iconscout.com/icon/free/png-256/american-express-44503.png" alt="Amex" className="h-8" />
                 </div>
                 
                 <div className="flex items-center justify-center">
