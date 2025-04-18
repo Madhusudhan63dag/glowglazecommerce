@@ -66,19 +66,19 @@ const Home = () => {
   const banners = [
     {
       id: 1,
-      imageUrl: "https://placehold.co/1920x600/222222/FFFFFF/png?text=Banner+1",
+      imageUrl: "https://placehold.co/1080x600/222222/FFFFFF/png?text=Banner+1",
     },
     {
       id: 2,
-      imageUrl: "https://placehold.co/1920x600/003366/FFFFFF/png?text=Banner+2",
+      imageUrl: "https://placehold.co/1080x600/003366/FFFFFF/png?text=Banner+2",
     },
     {
       id: 3,
-      imageUrl: "https://placehold.co/1920x600/660033/FFFFFF/png?text=Banner+3",
+      imageUrl: "https://placehold.co/1080x600/660033/FFFFFF/png?text=Banner+3",
     },
     {
       id: 4,
-      imageUrl: "https://placehold.co/1920x600/336600/FFFFFF/png?text=Banner+4",
+      imageUrl: "https://placehold.co/1080x600/336600/FFFFFF/png?text=Banner+4",
     }
   ];
 
@@ -251,25 +251,33 @@ const Home = () => {
 
   const scrollLeftDiet = () => {
     if (dietCardsRef.current) {
-      dietCardsRef.current.scrollBy({ left: -280, behavior: 'smooth' });
+      const containerWidth = dietCardsRef.current.clientWidth;
+      const scrollAmount = Math.min(280, containerWidth * 0.8);
+      dietCardsRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     }
   };
 
   const scrollRightDiet = () => {
     if (dietCardsRef.current) {
-      dietCardsRef.current.scrollBy({ left: 280, behavior: 'smooth' });
+      const containerWidth = dietCardsRef.current.clientWidth;
+      const scrollAmount = Math.min(280, containerWidth * 0.8);
+      dietCardsRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
   const scrollLeftBrand = () => {
     if (brandCardsRef.current) {
-      brandCardsRef.current.scrollBy({ left: -280, behavior: 'smooth' });
+      const containerWidth = brandCardsRef.current.clientWidth;
+      const scrollAmount = Math.min(280, containerWidth * 0.8);
+      brandCardsRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     }
   };
 
   const scrollRightBrand = () => {
     if (brandCardsRef.current) {
-      brandCardsRef.current.scrollBy({ left: 280, behavior: 'smooth' });
+      const containerWidth = brandCardsRef.current.clientWidth;
+      const scrollAmount = Math.min(280, containerWidth * 0.8);
+      brandCardsRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
@@ -289,7 +297,7 @@ const Home = () => {
           {banners.map((banner, index) => (
             <div key={banner.id} className="w-full flex-shrink-0">
               <div
-                className="relative w-full h-[500px] bg-cover bg-center"
+                className="relative w-full h-[250px] sm:h-[350px] md:h-[400px] lg:h-[500px] bg-cover bg-center"
                 style={{ backgroundImage: `url(${banner.imageUrl})` }}
               ></div>
             </div>
@@ -300,7 +308,7 @@ const Home = () => {
           {banners.map((_, index) => (
             <button
               key={index}
-              className={`w-3 h-3 rounded-full ${
+              className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${
                 currentBanner === index ? 'bg-white' : 'bg-gray-400'
               }`}
               onClick={() => goToBanner(index)}
@@ -310,29 +318,29 @@ const Home = () => {
         </div>
       </section>
       {/* trending section */}
-      <section className="container mx-auto py-10">
-        <h1 className="text-center font-bold text-4xl">Trending Now</h1>
-        <div className="flex justify-center gap-5 flex-wrap">
+      <section className="container mx-auto py-5 md:py-10 px-4">
+        <h1 className="text-center font-bold text-2xl md:text-3xl lg:text-4xl mb-4 md:mb-6">Trending Now</h1>
+        <div className="flex justify-center flex-wrap gap-3 md:gap-5">
           {trending.map((card, index) => (
-            <div key={index} onClick={(e) => handleTrendingCardClick(card, e)} className="cursor-pointer">
+            <div key={index} onClick={(e) => handleTrendingCardClick(card, e)} className="cursor-pointer w-[45%] sm:w-auto">
               <Card key={index} card={card} />
             </div>
           ))}
         </div>
       </section>
 
-      <section className="container mx-auto py-10 relative">
-        <h1 className="text-center font-bold text-4xl mb-6">What's New</h1>
+      <section className="container mx-auto py-5 md:py-10 px-4 relative">
+        <h1 className="text-center font-bold text-2xl md:text-3xl lg:text-4xl mb-4 md:mb-6">What's New</h1>
 
-        <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-4">
+        <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-2 md:px-4">
           <button
             onClick={scrollLeftNew}
-            className="bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors"
+            className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll left"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-4 w-4 md:h-6 md:w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -342,12 +350,12 @@ const Home = () => {
           </button>
           <button
             onClick={scrollRightNew}
-            className="bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors"
+            className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll right"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-4 w-4 md:h-6 md:w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -359,7 +367,7 @@ const Home = () => {
 
         <div
           ref={newCardsRef}
-          className="flex overflow-x-auto gap-5 pb-6 scrollbar-hide px-4 snap-x snap-mandatory"
+          className="flex overflow-x-auto gap-3 md:gap-5 pb-6 scrollbar-hide px-2 md:px-4 snap-x snap-mandatory"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none'
@@ -370,8 +378,9 @@ const Home = () => {
               key={index}
               className="flex-shrink-0 snap-center transition-all duration-300 cursor-pointer"
               style={{
-                width: 'calc(25% - 15px)',
-                minWidth: '220px',
+                width: 'calc(50% - 6px)',
+                minWidth: '150px',
+                maxWidth: '280px',
                 borderRadius: '8px'
               }}
               onClick={() => handleProductClick(card.id)}
@@ -385,7 +394,7 @@ const Home = () => {
           {Array.from({ length: Math.ceil(cards8.length / 4) }).map((_, index) => (
             <button
               key={index}
-              className={`w-8 h-2 rounded-full ${newCardsPosition === index ? 'bg-blue-500' : 'bg-gray-300'}`}
+              className={`w-4 md:w-8 h-2 rounded-full ${newCardsPosition === index ? 'bg-blue-500' : 'bg-gray-300'}`}
               onClick={() => {
                 if (newCardsRef.current) {
                   const scrollAmount = (newCardsRef.current.scrollWidth / Math.ceil(cards8.length / 4)) * index;
@@ -399,18 +408,18 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="container mx-auto py-10 relative">
-        <h1 className="text-center font-bold text-4xl mb-6">Global Standards, Trusted Quality</h1>
+      <section className="container mx-auto py-5 md:py-10 px-4 relative">
+        <h1 className="text-center font-bold text-2xl md:text-3xl lg:text-4xl mb-4 md:mb-6">Global Standards, Trusted Quality</h1>
 
-        <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-4">
+        <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-2 md:px-4">
           <button
             onClick={scrollLeftDiet}
-            className="bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors"
+            className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll left"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-4 w-4 md:h-6 md:w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -420,12 +429,12 @@ const Home = () => {
           </button>
           <button
             onClick={scrollRightDiet}
-            className="bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors"
+            className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll right"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-4 w-4 md:h-6 md:w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -437,7 +446,7 @@ const Home = () => {
 
         <div
           ref={dietCardsRef}
-          className="flex overflow-x-auto pb-6 scrollbar-hide px-4"
+          className="flex overflow-x-auto pb-6 scrollbar-hide px-2 md:px-4"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -449,8 +458,9 @@ const Home = () => {
               key={index}
               className={`flex-shrink-0 snap-center transition-all duration-300 ${index < 4 ? 'scale-100' : 'scale-95 opacity-90'}`}
               style={{
-                width: 'calc(20% - 15px)',
-                minWidth: '120px',
+                width: 'calc(33.333% - 8px)',
+                minWidth: '100px',
+                maxWidth: '160px',
                 borderRadius: '8px'
               }}
             >
@@ -465,7 +475,7 @@ const Home = () => {
           {[0, 1].map((group) => (
             <button
               key={group}
-              className={`w-8 h-2 rounded-full ${group === 0 ? 'bg-blue-500' : 'bg-gray-300'}`}
+              className={`w-4 md:w-8 h-2 rounded-full ${group === 0 ? 'bg-blue-500' : 'bg-gray-300'}`}
               onClick={() => {
                 if (dietCardsRef.current) {
                   dietCardsRef.current.scrollTo({ left: group * 1100, behavior: 'smooth' });
@@ -476,18 +486,18 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="container mx-auto py-10 relative">
-        <h1 className="text-center font-bold text-4xl mb-6">Shop by Brand</h1>
+      <section className="container mx-auto py-5 md:py-10 px-4 relative">
+        <h1 className="text-center font-bold text-2xl md:text-3xl lg:text-4xl mb-4 md:mb-6">Shop by Brand</h1>
 
-        <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-4">
+        <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-2 md:px-4">
           <button
             onClick={scrollLeftBrand}
-            className="bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors"
+            className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll left"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-4 w-4 md:h-6 md:w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -497,12 +507,12 @@ const Home = () => {
           </button>
           <button
             onClick={scrollRightBrand}
-            className="bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors"
+            className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll right"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-4 w-4 md:h-6 md:w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -514,7 +524,7 @@ const Home = () => {
 
         <div
           ref={brandCardsRef}
-          className="flex overflow-x-auto gap-5 pb-6 scrollbar-hide px-4"
+          className="flex overflow-x-auto gap-3 md:gap-5 pb-6 scrollbar-hide px-2 md:px-4"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -526,8 +536,9 @@ const Home = () => {
               key={index}
               className={`flex-shrink-0 snap-center transition-all duration-300 ${index < 4 ? 'scale-100' : 'scale-95 opacity-90'} cursor-pointer`}
               style={{
-                width: 'calc(25% - 15px)',
-                minWidth: '220px',
+                width: 'calc(50% - 6px)',
+                minWidth: '140px',
+                maxWidth: '220px',
                 borderRadius: '8px'
               }}
               onClick={(e) => handleBrandClick(card, e)}
@@ -540,17 +551,17 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="container mx-auto py-10 relative">
-        <h1 className="font-bold text-4xl text-center pb-10">Item of the Week</h1>
-        <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-4">
+      <section className="container mx-auto py-5 md:py-10 px-4 relative">
+        <h1 className="text-center font-bold text-2xl md:text-3xl lg:text-4xl mb-4 md:mb-6">Item of the Week</h1>
+        <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-2 md:px-4">
           <button
             onClick={scrollLeftNew_Two}
-            className="bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors"
+            className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll left"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-4 w-4 md:h-6 md:w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -560,12 +571,12 @@ const Home = () => {
           </button>
           <button
             onClick={scrollRightNew_Two}
-            className="bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors"
+            className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll right"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-4 w-4 md:h-6 md:w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -577,7 +588,7 @@ const Home = () => {
 
         <div
           ref={itemOfWeekRef}
-          className="flex overflow-x-auto gap-5 pb-6 scrollbar-hide px-4 snap-x snap-mandatory"
+          className="flex overflow-x-auto gap-3 md:gap-5 pb-6 scrollbar-hide px-2 md:px-4 snap-x snap-mandatory"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none'
@@ -588,8 +599,9 @@ const Home = () => {
               key={index}
               className="flex-shrink-0 snap-center transition-all duration-300 cursor-pointer"
               style={{
-                width: '100%',
-                minWidth: '220px',
+                width: 'calc(100% - 16px)',
+                minWidth: '250px',
+                maxWidth: '100%',
                 borderRadius: '8px'
               }}
               onClick={() => handleProductClick(product.id)}
@@ -603,7 +615,7 @@ const Home = () => {
           {Array.from({ length: Math.ceil(itemOfWeekProducts.length / 4) }).map((_, index) => (
             <button
               key={index}
-              className={`w-8 h-2 rounded-full ${itemOfWeekPosition === index ? 'bg-blue-500' : 'bg-gray-300'}`}
+              className={`w-4 md:w-8 h-2 rounded-full ${itemOfWeekPosition === index ? 'bg-blue-500' : 'bg-gray-300'}`}
               onClick={() => {
                 if (itemOfWeekRef.current) {
                   const scrollAmount = (itemOfWeekRef.current.scrollWidth / Math.ceil(itemOfWeekProducts.length / 4)) * index;

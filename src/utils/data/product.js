@@ -1,3 +1,19 @@
+import soap from "../../utils/image/icon/soap_free.png"
+import paraben from '../../utils/image/icon/paraben_Free.png'
+import ayush from '../../utils/image/icon/ayush.png'
+import bharat from '../../utils/image/icon/bharat.svg'
+import cruelty_free from '../../utils/image/icon/cruelty_free.png'
+import gmp from '../../utils/image/icon/gmp.png'
+import iso from '../../utils/image/icon/iso.svg'
+import no_side_effects from '../../utils/image/icon/no_side_effects.svg'
+import herbal from '../../utils/image/icon/herbal.png'
+import vegetarian from '../../utils/image/icon/vegetarian.png'
+import joint_pain from '../../utils/image/icon/joint_pain.png'
+import antiInflammatory from '../../utils/image/icon/antiInflammatory.png'
+import clinicallytested from '../../utils/image/icon/clinicallytested.png'
+import nosyntheticadditives from '../../utils/image/icon/nosyntheticadditives.png'
+import phbalanced from '../../utils/image/icon/phbalanced.png'
+
 const trending = [
   {
     id: 1,
@@ -96,8 +112,8 @@ const productData = [
   },
   {
     "id": 2,
-    "title": "Dr. Joints Advanced Joint Health Formula",
-    "description": "A dietary supplement formulated with FruiteX-B, Glucosamine, and Chondroitin to support joint mobility, flexibility, and reduce inflammation.",
+    "title": "Beyond Slim Ayurvedic Slimming Oil",
+    "description": "An Ayurvedic slimming oil crafted with natural herbs to reduce stubborn fat, improve skin elasticity, and support holistic wellness. Made under expert supervision using pure plant extracts, it's 100% vegan, cruelty-free, and free from harmful additives—bringing you safe, effective results rooted in traditional healing.",
     "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
     "features": [
       { "id": 1, "title": "Supports Joint Health", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
@@ -108,8 +124,8 @@ const productData = [
   },
   {
     "id": 3,
-    "title": "Beyondslim ZipSlim Drink Mix",
-    "description": "A metabolism-boosting drink mix designed to support weight loss and energy levels.",
+    "title": "Beyond Slim ",
+    "description": "A refreshing drink mix formulated to reboot your metabolism, curb cravings, and support healthy weight loss. Made with natural ingredients like green tea extract and ashwagandha, ZipSlim® is designed to help you feel energized, burn fat, and stay on track—available in delicious flavors and both caffeinated and caffeine-free options.",
     "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
     "features": [
       { "id": 1, "title": "Boosts Metabolism", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
@@ -157,29 +173,28 @@ const productData = [
 ]
 
 const trendingpage = [
-    {
-    "id": 1,
+  {"id": 1,
     "title": "Ayurvedic Medicine",
-    "description": "Embrace a balanced lifestyle with our Ayurvedic formulation—your natural ally in reducing excess fat and preventing new accumulation. Clinically tested and trusted by healthcare practitioners, this unique blend harnesses time-honored Ayurvedic wisdom to support your journey toward a healthier you.",
+    "description": "Support a balanced lifestyle with our Ayurvedic formula—designed to help reduce excess fat and block new buildup. Clinically tested and trusted by experts, it brings ancient wisdom to your modern health goals.",
     "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
     "benefits": {
-      "title": "Why Choose Our Ayurvedic Formulation",
+      "title": "What Makes Our Ayurvedic Formula Stand Out",
       "points": [
         {
-          "title": "Natural & Pure",
-          "description": "Crafted with a potent blend of traditional herbs, each ingredient is carefully selected to ensure maximum efficacy without harmful chemicals or artificial additives."
+          "title": "100% Natural Power",
+          "description": "Packed with time-tested Ayurvedic herbs, our formula delivers real results—without any harmful chemicals or synthetic fillers. Just pure, plant-based wellness."
         },
         {
-          "title": "Clinically Tested",
-          "description": "Our formulation has undergone rigorous clinical testing and is recommended by various practitioners, affirming its safety and effectiveness."
+          "title": "Backed by Science",
+          "description": "Clinically tested and trusted by health professionals, our product is proven to work safely and effectively. Real results, verified by experts."
         },
         {
-          "title": "Holistic Health",
-          "description": "Not only does it help reduce stubborn fat tissues, but it also supports overall wellness by promoting healthy digestion, boosting metabolism, and enhancing energy levels."
+          "title": "Total Body Support",
+          "description": "Go beyond fat loss—boost your metabolism, improve digestion, and feel more energized every day. It’s full-body wellness in one powerful blend."
         },
         {
-          "title": "Prevents Fat Accumulation",
-          "description": "By targeting the root causes of fat buildup, our formula helps prevent further accumulation, giving you the confidence to lead an active, vibrant life."
+          "title": "Stops Fat Before It Starts",
+          "description": "Our formula doesn’t just burn fat—it helps block new fat from forming by targeting the root causes. Stay in control, stay confident."
         }
       ]
     },
@@ -193,28 +208,27 @@ const trendingpage = [
     "banner": [
           {
       "id": 1,
-      "imageUrl": "https://placehold.co/1920x400/222222/FFFFFF/png?text=Trending+Products",
+      "imageUrl": "https://placehold.co/1080x600/222222/FFFFFF/png?text=Trending+Products",
       "heading": "Discover What's Hot",
       "subheading": "Explore our most popular health and wellness products"
     },
     {
       "id": 2,
-      "imageUrl": "https://placehold.co/1920x400/003366/FFFFFF/png?text=Best+Sellers",
+      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
       "heading": "Customer Favorites",
       "subheading": "The products our customers love the most"
     },
     {
       "id": 2,
-      "imageUrl": "https://placehold.co/1920x400/003366/FFFFFF/png?text=Best+Sellers",
+      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
       "heading": "Customer Favorites",
       "subheading": "The products our customers love the most"
     }
     ]
   },
-      {
-    "id": 2,
+  {"id": 2,
     "title": "Body Slim",
-    "description": "An Ayurvedic formulation designed to aid in weight management by promoting the reduction of excess fat tissues and preventing their accumulation. Clinically tested and recommended by various practitioners.",
+    "description": "Take control of your weight naturally with Body Slim—our powerful Ayurvedic formula crafted to help reduce stubborn fat and block future buildup. Clinically tested and trusted by health experts, it’s your go-to solution for effective, long-term weight management.",
     "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
     "products": [
       { "id": 1, "title": "Beyondslim", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 3990 },
@@ -222,28 +236,27 @@ const trendingpage = [
     "banner": [
           {
       "id": 1,
-      "imageUrl": "https://placehold.co/1920x400/222222/FFFFFF/png?text=Trending+Products",
+      "imageUrl": "https://placehold.co/1080x600/222222/FFFFFF/png?text=Trending+Products",
       "heading": "Discover What's Hot",
       "subheading": "Explore our most popular health and wellness products"
     },
     {
       "id": 2,
-      "imageUrl": "https://placehold.co/1920x400/003366/FFFFFF/png?text=Best+Sellers",
+      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
       "heading": "Customer Favorites",
       "subheading": "The products our customers love the most"
     },
     {
       "id": 2,
-      "imageUrl": "https://placehold.co/1920x400/003366/FFFFFF/png?text=Best+Sellers",
+      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
       "heading": "Customer Favorites",
       "subheading": "The products our customers love the most"
     }
     ]
   },
-      {
-    "id": 3,
+  {"id": 3,
     "title": "Skin Care",
-    "description": "An Ayurvedic formulation designed to aid in weight management by promoting the reduction of excess fat tissues and preventing their accumulation. Clinically tested and recommended by various practitioners.",
+    "description": "Reveal your natural glow with our Ayurvedic Skin Care formula—crafted with herbal ingredients that nourish, protect, and rejuvenate from within. Clinically tested and recommended by practitioners, it supports clear, radiant, and healthy skin the natural way.",
     "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
     "products": [
       { "id": 3, "title": "PSORIGO Oil", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 1499 },
@@ -253,19 +266,19 @@ const trendingpage = [
     "banner": [
           {
       "id": 1,
-      "imageUrl": "https://placehold.co/1920x400/222222/FFFFFF/png?text=Trending+Products",
+      "imageUrl": "https://placehold.co/1080x600/222222/FFFFFF/png?text=Trending+Products",
       "heading": "Discover What's Hot",
       "subheading": "Explore our most popular health and wellness products"
     },
     {
       "id": 2,
-      "imageUrl": "https://placehold.co/1920x400/003366/FFFFFF/png?text=Best+Sellers",
+      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
       "heading": "Customer Favorites",
       "subheading": "The products our customers love the most"
     },
     {
       "id": 2,
-      "imageUrl": "https://placehold.co/1920x400/003366/FFFFFF/png?text=Best+Sellers",
+      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
       "heading": "Customer Favorites",
       "subheading": "The products our customers love the most"
     }
@@ -285,13 +298,13 @@ const productDetailData = [
       "https://placehold.co/500x500/e3f2fd/1e88e5?text=Sampoorn+Arogya+4"
     ],
     "badge": "New",
-    "whyLoveIt": "Sampoorn Arogya is an authentic Ayurvedic formulation designed to promote overall health and wellness. This comprehensive herbal supplement combines ancient wisdom with modern science to support your body's natural balance. With regular use, it helps strengthen immunity, improve digestion, and enhance vitality.",
+    "whyLoveIt": "Revitalize your body from within with Sampoorn Arogya—an all-in-one Ayurvedic supplement crafted to strengthen immunity, improve digestion, and boost daily energy. Backed by ancient wisdom and modern science, it's your go-to for total wellness support.",
     "ingredients": "Ashwagandha, Triphala, Shatavari, Guduchi, Brahmi, Turmeric, Ginger, Pippali, and other traditional Ayurvedic herbs.",
     "allergens": ["No known allergens"],
     "values": [
-      { "code": "AY", "name": "Ayurvedic", "color": "green" },
-      { "code": "HB", "name": "Herbal", "color": "blue" },
-      { "code": "VG", "name": "Vegetarian", "color": "red" }
+      { "code": "AY", "name": "Ayurvedic", "img": ayush },
+      { "code": "HB", "name": "Herbal", "img": herbal },
+      { "code": "VG", "name": "Vegetarian", "img": vegetarian }
     ],
     "inStock": true
   },
@@ -306,34 +319,33 @@ const productDetailData = [
       "https://placehold.co/500x500/e8f5e9/43a047?text=Dr+Joints+4"
     ],
     "badge": "Bestseller",
-    "whyLoveIt": "Dr. Joints is a specialized formula designed to support joint health and mobility. With its unique combination of FruiteX-B, Glucosamine, and Chondroitin, this supplement helps reduce inflammation, improve flexibility, and provide relief from joint discomfort. Perfect for active individuals or those experiencing age-related joint stiffness.",
+    "whyLoveIt": "Say goodbye to joint discomfort with Dr. Joints—your daily dose of comfort and flexibility. Powered by FruiteX-B and key joint-support nutrients, this formula helps reduce stiffness, ease movement, and keep you active without limits.",
     "ingredients": "FruiteX-B (calcium fructoborate), Glucosamine Sulfate, Chondroitin Sulfate, MSM (Methylsulfonylmethane), Boswellia Extract, Turmeric Extract, Ginger Extract.",
     "allergens": ["Shellfish (from Glucosamine)"],
     "values": [
-      { "code": "JH", "name": "Joint Health", "color": "blue" },
-      { "code": "AI", "name": "Anti-Inflammatory", "color": "green" },
-      { "code": "CT", "name": "Clinically Tested", "color": "purple" }
+      { "code": "JH", "name": "Joint Health", "img": joint_pain },
+      { "code": "AI", "name": "Anti-Inflammatory", "img": antiInflammatory },
+      { "code": "CT", "name": "Clinically Tested", "img": clinicallytested }
     ],
     "inStock": true
   },
   {
     "id": 3,
-    "title": "Beyondslim ZipSlim Drink Mix",
+    "title": "Beyond Slim Ayurvedic Slimming Oil",
     "price": "₹3,990",
     "images": [
-      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyondslim+1",
-      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyondslim+2",
-      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyondslim+3",
-      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyondslim+4"
+      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyond+Slim+Oil+1",
+      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyond+Slim+Oil+2",
+      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyond+Slim+Oil+3",
+      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyond+Slim+Oil+4"
     ],
     "badge": "Popular",
-    "whyLoveIt": "Beyondslim ZipSlim is a delicious and effective metabolism-boosting drink mix that supports your weight management goals. Formulated with natural ingredients that help increase energy levels, reduce cravings, and enhance fat burning. Simply mix with water and enjoy this refreshing drink daily as part of your healthy lifestyle routine.",
-    "ingredients": "Green Tea Extract, Garcinia Cambogia, Chromium Picolinate, L-Carnitine, Apple Cider Vinegar Powder, Inulin, Natural Flavors, Stevia Leaf Extract.",
-    "allergens": ["No known allergens"],
+    "whyLoveIt": "Target stubborn fat, tone your body, and nourish your skin with Beyond Slim Ayurvedic Slimming Oil—made with potent herbal extracts and time-tested Ayurvedic ingredients. It's your natural solution to inch loss and improved skin elasticity.",
+    "ingredients": "Sesame Oil, Castor Oil, Garlic Extract, Cinnamon Oil, Eucalyptus Oil, Ginger Extract, Lemon Oil, Camphor, Ajwain Oil, Clove Oil, Ayurvedic Herbs.",
     "values": [
-      { "code": "NI", "name": "Natural Ingredients", "color": "green" },
-      { "code": "SF", "name": "Sugar-Free", "color": "blue" },
-      { "code": "MB", "name": "Metabolism Boost", "color": "orange" }
+      { "code": "AI", "name": "Ayurvedic Ingredients", "img": ayush },
+      { "code": "VF", "name": "Vegan & Cruelty-Free", "img": cruelty_free },
+      { "code": "NS", "name": "No Synthetic Additives", "img": nosyntheticadditives }
     ],
     "inStock": true
   },
@@ -348,13 +360,13 @@ const productDetailData = [
       "https://placehold.co/500x500/e1f5fe/03a9f4?text=PSORIGO+Lotion+4"
     ],
     "badge": "Dermatologist Approved",
-    "whyLoveIt": "PSORIGO Body Lotion is specially formulated for psoriasis-prone skin, providing deep moisturization and relief from scaling and irritation. This gentle yet effective lotion contains natural ingredients that soothe, hydrate, and help restore the skin's natural barrier. Regular use helps maintain skin health and reduce flare-ups.",
+    "whyLoveIt": "Soothe, hydrate, and heal with PSORIGO Body Lotion—formulated for psoriasis-prone skin. This gentle yet powerful blend helps reduce flaking, calm irritation, and restore your skin’s natural softness and strength.",
     "ingredients": "Purified Water, Aloe Vera Extract, Shea Butter, Coconut Oil, Neem Extract, Turmeric Extract, Tea Tree Oil, Calendula Extract, Vitamin E, Glycerin, Natural Preservatives.",
     "allergens": ["May contain tree nut derivatives (coconut, shea)"],
     "values": [
-      { "code": "PF", "name": "Paraben-Free", "color": "green" },
-      { "code": "DT", "name": "Dermatologically Tested", "color": "blue" },
-      { "code": "HY", "name": "Hypoallergenic", "color": "purple" }
+      { "code": "SF", "name": "Soap-Free", "img": soap },
+      { "code": "PF", "name": "Paraben-Free", "img": paraben },
+      { "code": "pH", "name": "pH Balanced", "img": phbalanced }
     ],
     "inStock": true
   },
@@ -369,13 +381,13 @@ const productDetailData = [
       "https://placehold.co/500x500/e1f5fe/0288d1?text=PSORIGO+Wash+4"
     ],
     "badge": "Gentle Formula",
-    "whyLoveIt": "PSORIGO Body Wash is a gentle cleansing solution developed specifically for sensitive, psoriasis-prone skin. This soap-free formula removes impurities without stripping essential oils, leaving your skin feeling clean, calm, and comfortable. The soothing ingredients help reduce irritation while maintaining your skin's natural moisture balance.",
+    "whyLoveIt": "Cleanse with care using PSORIGO Body Wash—a soap-free formula designed for sensitive, psoriasis-prone skin. It gently lifts away impurities while locking in moisture, leaving your skin calm, clean, and comforted.",
     "ingredients": "Purified Water, Glycerin, Aloe Vera Juice, Decyl Glucoside (Plant-Based Cleanser), Dead Sea Minerals, Colloidal Oatmeal, Chamomile Extract, Lavender Oil, Vitamin B5, Natural Preservatives.",
     "allergens": ["May contain oat derivatives"],
     "values": [
-      { "code": "SF", "name": "Soap-Free", "color": "blue" },
-      { "code": "PF", "name": "Paraben-Free", "color": "green" },
-      { "code": "pH", "name": "pH Balanced", "color": "purple" }
+      { "code": "SF", "name": "Soap-Free", "img": soap },
+      { "code": "PF", "name": "Paraben-Free", "img": paraben },
+      { "code": "pH", "name": "pH Balanced", "img": phbalanced }
     ],
     "inStock": true
   },
@@ -390,13 +402,13 @@ const productDetailData = [
       "https://placehold.co/500x500/e0f2f1/00897b?text=PSORIGO+Oil+4"
     ],
     "badge": "100% Natural",
-    "whyLoveIt": "PSORIGO Oil is a therapeutic herbal oil blend specially formulated to provide relief from psoriasis symptoms. This lightweight, non-greasy formula deeply moisturizes the skin, reduces inflammation, and helps alleviate itching and discomfort. Regular application helps manage scaling and promotes healthier-looking skin.",
+    "whyLoveIt": "Target psoriasis symptoms at the root with PSORIGO Oil—a rich, herbal treatment that hydrates deeply, soothes itchiness, and reduces inflammation. Fast-absorbing and non-greasy, it leaves your skin feeling calm and cared for.",
     "ingredients": "Coconut Oil, Neem Oil, Tea Tree Oil, Black Seed Oil, Turmeric Extract, Aloe Vera Extract, Vitamin E, Evening Primrose Oil, Calendula Oil, Jojoba Oil.",
     "allergens": ["May contain tree nut derivatives (coconut, jojoba)"],
     "values": [
-      { "code": "NI", "name": "Natural Ingredients", "color": "green" },
-      { "code": "HB", "name": "Herbal", "color": "blue" },
-      { "code": "CF", "name": "Chemical-Free", "color": "red" }
+      { "code": "SF", "name": "Soap-Free", "img": soap },
+      { "code": "PF", "name": "Paraben-Free", "img": paraben },
+      { "code": "pH", "name": "pH Balanced", "img": phbalanced }
     ],
     "inStock": true
   }
@@ -405,57 +417,56 @@ const productDetailData = [
 // Deal data moved from DealsPage.js
 const dealsData = {
   'sampoorn-arogya': {
-    title: 'Sampoorn Arogya Special Offer',
-    description: 'Experience the authentic benefits of Ayurvedic medicine with our Sampoorn Arogya special offer. Limited time promotion, get it while supplies last.',
+    title: 'Sampoorn Arogya Wellness Offer',
+    description: 'Unlock the full power of Ayurvedic healing with Sampoorn Arogya. Strengthen immunity, improve digestion, and boost vitality—now at 15% OFF for a limited time. Don’t miss your chance to feel your best, naturally.',
     productIds: [1],
     discount: '15% OFF',
     banners: [
       {
         id: 1,
-        imageUrl: "https://placehold.co/1920x400/e3f2fd/1e88e5?text=Sampoorn+Arogya+Special+Offer",
-       
+        imageUrl: "https://placehold.co/1080x600/e3f2fd/1e88e5?text=Sampoorn+Arogya+Special+Offer"
       },
       {
         id: 2,
-        imageUrl: "https://placehold.co/1920x400/f3e5f5/9c27b0?text=Sampoorn+Arogya+Benefits",
+        imageUrl: "https://placehold.co/1080x600/f3e5f5/9c27b0?text=Sampoorn+Arogya+Benefits"
       }
     ]
   },
   'dr-joints': {
-    title: 'Dr. Joints Discount',
-    description: 'Improve your joint health and mobility with our special discount on Dr. Joints formula. Clinically tested and proven effective.',
+    title: 'Dr. Joints Mobility Deal',
+    description: 'Move with ease and comfort—Dr. Joints is your daily joint care essential. Clinically tested to reduce stiffness and support flexibility. Now available at 10% OFF. Take the first step toward pain-free movement.',
     productIds: [2],
     discount: '10% OFF',
     banners: [
       {
         id: 1,
-        imageUrl: "https://placehold.co/1920x400/e8f5e9/43a047?text=Dr+Joints+Special+Offer",
+        imageUrl: "https://placehold.co/1080x600/e8f5e9/43a047?text=Dr+Joints+Special+Offer"
       },
       {
         id: 2,
-        imageUrl: "https://placehold.co/1920x400/e0f7fa/00bcd4?text=Joint+Health",
+        imageUrl: "https://placehold.co/1080x600/e0f7fa/00bcd4?text=Joint+Health"
       }
     ]
   },
   'beyondslim': {
-    title: 'Beyondslim Special',
-    description: 'Jumpstart your weight management journey with our Beyondslim special offer. Effective and delicious support for your goals.',
+    title: 'Beyondslim Limited-Time Offer',
+    description: 'Boost your metabolism and crush cravings with Beyondslim ZipSlim. A tasty, natural drink mix designed to support your weight goals—now 12% OFF. Fuel your fat loss journey with every sip.',
     productIds: [3],
     discount: '12% OFF',
     banners: [
       {
         id: 1,
-        imageUrl: "https://placehold.co/1920x400/fff3e0/ff9800?text=Beyondslim+Special+Offer",
+        imageUrl: "https://placehold.co/1080x600/fff3e0/ff9800?text=Beyondslim+Special+Offer"
       },
       {
         id: 2,
-        imageUrl: "https://placehold.co/1920x400/ffebee/f44336?text=Weight+Management",
+        imageUrl: "https://placehold.co/1080x600/ffebee/f44336?text=Weight+Management"
       }
     ]
   },
   'psorigo': {
-    title: 'PSORIGO Exclusive Bundle',
-    description: 'Get our complete PSORIGO skin care collection at a special bundle price. Includes Body Lotion, Body Wash, and Oil for comprehensive skin support.',
+    title: 'PSORIGO Skin Care Bundle Deal',
+    description: 'Say goodbye to irritation and hello to smoother, calmer skin. Get the complete PSORIGO care set—Body Lotion, Wash & Oil—for one special price. Save big with 20% OFF and restore your skin’s natural balance.',
     productIds: [4, 5, 6],
     discount: '20% OFF',
     isBundle: true,
@@ -464,27 +475,28 @@ const dealsData = {
     banners: [
       {
         id: 1,
-        imageUrl: "https://placehold.co/1920x400/e0f2f1/00897b?text=PSORIGO+Bundle+Offer",
+        imageUrl: "https://placehold.co/1080x600/e0f2f1/00897b?text=PSORIGO+Bundle+Offer"
       },
       {
         id: 2,
-        imageUrl: "https://placehold.co/1920x400/e1f5fe/03a9f4?text=Skin+Support",
+        imageUrl: "https://placehold.co/1080x600/e1f5fe/03a9f4?text=Skin+Support"
       }
     ]
   }
 };
 
+
 // About page banner data
 const aboutBanner = [
   {
     id: 1,
-    imageUrl: "https://placehold.co/1920x600/e8f5e9/43a047?text=About+GlowGlaz",
+    imageUrl: "https://placehold.co/1080x600/e8f5e9/43a047?text=About+GlowGlaz",
     heading: "About GlowGlaz",
     subheading: "Natural wellness solutions for modern living"
   },
   {
     id: 2,
-    imageUrl: "https://placehold.co/1920x600/e3f2fd/1e88e5?text=Our+Heritage",
+    imageUrl: "https://placehold.co/1080x600/e3f2fd/1e88e5?text=Our+Heritage",
     heading: "Our Heritage",
     subheading: "Blending ancient wisdom with modern science since 2015"
   }
@@ -494,13 +506,13 @@ const aboutBanner = [
 const contactBanner = [
   {
     id: 1,
-    imageUrl: "https://placehold.co/1920x400/e1f5fe/0288d1?text=Contact+GlowGlaz",
+    imageUrl: "https://placehold.co/1080x600/e1f5fe/0288d1?text=Contact+GlowGlaz",
     heading: "Contact Us",
     subheading: "We're here to help with all your wellness needs"
   },
   {
     id: 2,
-    imageUrl: "https://placehold.co/1920x400/e0f7fa/00bcd4?text=Customer+Support",
+    imageUrl: "https://placehold.co/1080x600/e0f7fa/00bcd4?text=Customer+Support",
     heading: "Customer Support",
     subheading: "Get in touch with our dedicated support team"
   }
@@ -598,13 +610,13 @@ const contactFaqs = [
 const faqBanner = [
   {
     id: 1,
-    imageUrl: "https://placehold.co/1920x400/e8eaf6/3f51b5?text=Frequently+Asked+Questions",
+    imageUrl: "https://placehold.co/1080x600/e8eaf6/3f51b5?text=Frequently+Asked+Questions",
     heading: "Frequently Asked Questions",
     subheading: "Find answers to common questions about our products and services"
   },
   {
     id: 2,
-    imageUrl: "https://placehold.co/1920x400/f3e5f5/9c27b0?text=Help+Center",
+    imageUrl: "https://placehold.co/1080x600/f3e5f5/9c27b0?text=Help+Center",
     heading: "Help Center",
     subheading: "We're here to assist you with any questions you might have"
   }
@@ -726,13 +738,13 @@ const faqData = [
 const shippingBanner = [
   {
     id: 1,
-    imageUrl: "https://placehold.co/1920x400/e8f5e9/43a047?text=Shipping+%26+Returns",
+    imageUrl: "https://placehold.co/1080x600/e8f5e9/43a047?text=Shipping+%26+Returns",
     heading: "Shipping & Returns",
     subheading: "Everything you need to know about our delivery and return policies"
   },
   {
     id: 2,
-    imageUrl: "https://placehold.co/1920x400/e3f2fd/1e88e5?text=Customer+Satisfaction",
+    imageUrl: "https://placehold.co/1080x600/e3f2fd/1e88e5?text=Customer+Satisfaction",
     heading: "Customer Satisfaction Guaranteed",
     subheading: "We want you to be completely satisfied with your purchase"
   }
@@ -881,13 +893,13 @@ const shippingFaqs = [
 const privacyBanner = [
   {
     id: 1,
-    imageUrl: "https://placehold.co/1920x400/efeff9/6366f1?text=Privacy+Policy",
+    imageUrl: "https://placehold.co/1080x600/efeff9/6366f1?text=Privacy+Policy",
     heading: "Privacy Policy",
     subheading: "How we collect, use, and protect your personal information"
   },
   {
     id: 2,
-    imageUrl: "https://placehold.co/1920x400/f0f9ff/2563eb?text=Data+Protection",
+    imageUrl: "https://placehold.co/1080x600/f0f9ff/2563eb?text=Data+Protection",
     heading: "Data Protection",
     subheading: "We're committed to safeguarding your personal information"
   }
@@ -1040,13 +1052,13 @@ const privacyPolicy = {
 const termsBanner = [
   { 
     id: 1,
-    imageUrl: "https://placehold.co/1920x400/f3f4f6/6b7280?text=Terms+%26+Conditions",
+    imageUrl: "https://placehold.co/1080x600/f3f4f6/6b7280?text=Terms+%26+Conditions",
     heading: "Terms & Conditions",
     subheading: "Please read our terms and conditions carefully before using our services"
   },
   {
     id: 2,
-    imageUrl: "https://placehold.co/1920x400/eef2ff/4f46e5?text=Legal+Information",
+    imageUrl: "https://placehold.co/1080x600/eef2ff/4f46e5?text=Legal+Information",
     heading: "Legal Information",
     subheading: "Understanding your rights and our policies"
   }
@@ -1199,4 +1211,4 @@ export default {
   privacyPolicy,
   termsBanner,
   termsAndConditions
-};
+}; 

@@ -319,10 +319,10 @@ const Trending = () => {
                   {selectedTrendingData.benefits.points.map((point, index) => {
                     // Map benefit titles to relevant images
                     const imageMap = {
-                      "Natural & Pure": "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-                      "Clinically Tested": "https://images.unsplash.com/photo-1584362917165-526a968579e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-                      "Holistic Health": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-                      "Prevents Fat Accumulation": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+                      "100% Natural Power": "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+                      "Backed by Science": "https://images.unsplash.com/photo-1584362917165-526a968579e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+                      "Total Body Support": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+                      "Stops Fat Before It Starts": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
                     };
                     
                     const imageUrl = imageMap[point.title] || `https://source.unsplash.com/300x300/?${encodeURIComponent(point.title.toLowerCase())}`;

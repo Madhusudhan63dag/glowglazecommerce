@@ -175,11 +175,6 @@ const ProductPage = () => {
                   <p className="text-gray-700">
                     {product.ingredients}
                   </p>
-                  {product.allergens && product.allergens.length > 0 && (
-                    <div className="mt-3 py-2 px-3 bg-yellow-50 border-l-4 border-yellow-400 text-sm">
-                      <span className="font-bold">Contains:</span> {product.allergens.join(', ')}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -193,8 +188,8 @@ const ProductPage = () => {
             <div className="grid grid-cols-3 max-w-2xl mx-auto text-center">
               {product.values.map((value, index) => (
                 <div key={index} className="flex flex-col items-center">
-                  <div className={`w-16 h-16 bg-${value.color}-100 rounded-full flex items-center justify-center mb-3`}>
-                    <span className={`text-${value.color}-600 font-bold`}>{value.code}</span>
+                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-3`}>
+                    <img src={value.img}  />
                   </div>
                   <span className="font-medium">{value.name}</span>
                 </div>
