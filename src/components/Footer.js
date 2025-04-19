@@ -155,8 +155,8 @@ const Footer = () => {
       <div className="border-t border-gray-700 py-3 sm:py-4">
         <div className="container mx-auto px-4 text-center text-xs sm:text-sm text-gray-400">
           <p>© GlowGlaz 2024 All rights reserved. 
-            <Link to="/faq" className="hover:text-white ml-1 sm:ml-2 transition">Terms & Conditions</Link> | 
-            <Link to="/faq" className="hover:text-white ml-1 sm:ml-2 transition">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-white ml-1 sm:ml-2 transition">Terms & Conditions</Link> | 
+            <Link to="/privacy" className="hover:text-white ml-1 sm:ml-2 transition">Privacy Policy</Link>
           </p>
         </div>
       </div>

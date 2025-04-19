@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaShoppingCart, FaLock, FaShippingFast, FaCreditCard, FaArrowLeft, FaCheckCircle, FaShieldAlt, FaMedal, FaRegCreditCard, FaYoutube } from 'react-icons/fa';
+import { FaShoppingCart, FaLock, FaShippingFast, FaCreditCard, FaArrowLeft, FaCheckCircle, FaShieldAlt, FaMedal, FaRegCreditCard, FaYoutube, FaEnvelope, FaBox, FaHeadset, FaPhone } from 'react-icons/fa';
+import SEO from '../components/SEO';
 
 // Add backend API URL - Fixed to properly use environment variables or fallback
-const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://razorpaybackend-wgbh.onrender.com' : 'http://localhost:5000');
+const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000'); //https://razorpaybackend-wgbh.onrender.com
 // Add YouTube OAuth credentials - Updated to use OAuth 2.0 with proper Google Identity Services
 const YOUTUBE_CLIENT_ID = process.env.REACT_APP_YOUTUBE_CLIENT_ID || '672880894908-nlo53e5cevqpvc1r1j45s3h8mr8a7fdu.apps.googleusercontent.com';
 const YOUTUBE_CHANNEL_ID = 'UCZk0XVMUcmhAGf0L-V9rUxA'; // Your YouTube channel ID
@@ -80,33 +81,6 @@ const Checkout = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  // Track potential abandoned cart when user leaves
-  useEffect(() => {
-    // Save cart data to localStorage for potential abandoned cart recovery
-    if (cart.length > 0) {
-      localStorage.setItem('pendingCheckout', JSON.stringify({
-        cart,
-        formData,
-        timestamp: new Date().toISOString()
-      }));
-    }
-
-    // Clean up function to handle potential abandoned cart
-    return () => {
-      const pendingCheckout = localStorage.getItem('pendingCheckout');
-      
-      // If checkout is not complete and user has entered email, send abandoned cart email
-      if (!orderComplete && formData.email && pendingCheckout) {
-        sendAbandonedCartEmail();
-      }
-      
-      // Clear pending checkout data if order was completed
-      if (orderComplete) {
-        localStorage.removeItem('pendingCheckout');
-      }
-    };
-  }, [formData.email, cart, orderComplete]);
 
   // Load Razorpay script
   const loadRazorpayScript = () => {
@@ -357,8 +331,76 @@ const Checkout = () => {
       name: 'GlowGlaz',
       description: 'Thank you for your purchase!',
       order_id: orderData.order.id,
-      handler: function (response) {
-        handlePaymentSuccess(response);
+      handler: async function (response) {
+        // Handle payment success directly here instead of calling another function
+        try {
+          setIsSubmitting(true);
+          console.log("Razorpay payment successful, verifying payment...");
+          
+          // Verify payment with backend
+          const verifyPayment = await fetch(`${API_URL}/verify-payment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+          
+          const paymentVerification = await verifyPayment.json();
+          
+          if (paymentVerification.success) {
+            console.log("Payment verification successful, preparing for navigation...");
+            
+            // Generate a unique order reference/number
+            const orderRef = `GG-${Math.floor(100000 + Math.random() * 900000)}`;
+            
+            // Set order success flag to prevent abandoned cart email
+            sessionStorage.setItem('orderSuccessful', 'true');
+            
+            // Set order complete state
+            setOrderComplete(true);
+            
+            // Send order confirmation email
+            await sendOrderConfirmationEmail(orderRef, response.razorpay_payment_id);
+            
+            // Clear cart and pending checkout data
+            clearCart();
+            localStorage.removeItem('pendingCheckout');
+            
+            // Create order data object for ThankYou page
+            const orderData = {
+              orderReference: orderRef,
+              paymentId: response.razorpay_payment_id,
+              formData,
+              paymentMethod,
+              cartItems: [...cart],
+              cartTotal,
+              orderTotal,
+              shippingCost,
+              discountAmount,
+              discountApplied
+            };
+            
+            // Store in localStorage as fallback
+            localStorage.setItem('lastCompletedOrder', JSON.stringify(orderData));
+            console.log("Order data saved to localStorage, redirecting...");
+            
+            // Use direct URL navigation with query parameter as the most reliable method
+            // This will work even if React Router state is lost in the process
+            window.location.href = `/thank-you?ref=${orderRef}`;
+          } else {
+            alert('Payment verification failed. Please contact support.');
+            setIsSubmitting(false);
+          }
+        } catch (error) {
+          console.error('Payment verification error:', error);
+          alert('Payment verification failed. Please contact support.');
+          setIsSubmitting(false);
+        }
       },
       prefill: {
         name: `${formData.firstName} ${formData.lastName}`,
@@ -370,54 +412,30 @@ const Checkout = () => {
       },
       theme: {
         color: '#4CAF50'
+      },
+      // Add modal closing callback to handle edge cases
+      modal: {
+        ondismiss: function() {
+          console.log('Razorpay modal closed');
+          setPaymentProcessing(false);
+          setIsSubmitting(false);
+        }
       }
     };
     
-    const paymentObject = new window.Razorpay(options);
-    paymentObject.open();
-    setPaymentProcessing(false);
-  };
-
-  // Handle successful Razorpay payment
-  const handlePaymentSuccess = async (response) => {
     try {
-      setIsSubmitting(true);
-      
-      // Verify payment with backend
-      const verifyPayment = await fetch(`${API_URL}/verify-payment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_signature: response.razorpay_signature,
-        }),
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.on('payment.failed', function (response) {
+        console.error('Payment failed:', response.error);
+        alert(`Payment failed: ${response.error.description}`);
+        setPaymentProcessing(false);
+        setIsSubmitting(false);
       });
-      
-      const paymentVerification = await verifyPayment.json();
-      
-      if (paymentVerification.success) {
-        setPaymentId(response.razorpay_payment_id);
-        // Generate a unique order reference/number
-        const orderRef = `GG-${Math.floor(100000 + Math.random() * 900000)}`;
-        setOrderReference(orderRef);
-        
-        // Send order confirmation email
-        await sendOrderConfirmationEmail(orderRef, response.razorpay_payment_id);
-        
-        setIsSubmitting(false);
-        setOrderComplete(true);
-        clearCart();
-        localStorage.removeItem('pendingCheckout');
-      } else {
-        alert('Payment verification failed. Please contact support.');
-        setIsSubmitting(false);
-      }
+      paymentObject.open();
     } catch (error) {
-      console.error('Payment verification error:', error);
-      alert('Payment verification failed. Please contact support.');
+      console.error('Error opening Razorpay:', error);
+      alert('Failed to open payment gateway. Please try again.');
+      setPaymentProcessing(false);
       setIsSubmitting(false);
     }
   };
@@ -425,14 +443,17 @@ const Checkout = () => {
   // Send order confirmation email - with improved error handling
   const sendOrderConfirmationEmail = async (orderNumber, paymentId) => {
     try {
-      // Prepare data for order confirmation email
-      const productNames = cart.map(item => item.title).join(', ');
-      const totalQuantity = cart.reduce((total, item) => total + item.quantity, 0);
+      // Format cart items into a proper products array structure for the email API
+      const products = cart.map(item => ({
+        name: item.title,
+        quantity: item.quantity,
+        price: (typeof item.price === 'number') ? item.price.toFixed(2) : item.price,
+        image: item.image
+      }));
       
       const orderDetails = {
         orderNumber,
-        productName: productNames,
-        quantity: totalQuantity,
+        products, // Send structured products array instead of just names
         totalAmount: orderTotal,
         currency: '₹',
         paymentMethod: paymentMethod === 'razorpay' ? 'Razorpay' : (paymentMethod === 'card' ? 'Credit Card' : 'Cash on Delivery'),
@@ -522,14 +543,17 @@ const Checkout = () => {
     try {
       if (!formData.email) return;
       
-      // Prepare data for abandoned cart email
-      const productNames = cart.map(item => item.title).join(', ');
-      const totalQuantity = cart.reduce((total, item) => total + item.quantity, 0);
+      // Format cart items into a proper products array structure for the email API
+      const products = cart.map(item => ({
+        name: item.title,
+        quantity: item.quantity,
+        price: (typeof item.price === 'number') ? item.price.toFixed(2) : item.price,
+        image: item.image
+      }));
       
       const orderDetails = {
         orderNumber: `PENDING-${Date.now()}`,
-        productName: productNames,
-        quantity: totalQuantity,
+        products, // Send structured products array instead of just names
         totalAmount: orderTotal,
         currency: '₹'
       };
@@ -597,6 +621,34 @@ const Checkout = () => {
     });
   }, []);
 
+  // Track potential abandoned cart when user leaves
+  useEffect(() => {
+    // Create a flag to track successful order completion
+    const orderSuccessFlag = sessionStorage.getItem('orderSuccessful');
+    
+    // Save cart data to localStorage for potential abandoned cart recovery
+    // Only if we don't have a successful order
+    if (cart.length > 0 && !orderSuccessFlag) {
+      localStorage.setItem('pendingCheckout', JSON.stringify({
+        cart,
+        formData,
+        timestamp: new Date().toISOString()
+      }));
+    }
+
+    // Clean up function to handle potential abandoned cart
+    return () => {
+      // We no longer need to send abandoned cart emails from Checkout.js
+      // since we already handle this in Auth.js when user leaves the shipping step
+      // This avoids duplicate abandoned cart emails
+      
+      // Just clean up pending checkout data if order was completed
+      if (orderComplete || sessionStorage.getItem('orderSuccessful')) {
+        localStorage.removeItem('pendingCheckout');
+      }
+    };
+  }, [formData, cart, orderComplete]);
+
   const handleSubmitOrder = async (e) => {
     e.preventDefault();
     
@@ -635,11 +687,32 @@ const Checkout = () => {
           const orderRef = `GG-${Math.floor(100000 + Math.random() * 900000)}`;
           setOrderReference(orderRef);
           
+          // Set order success flag to prevent abandoned cart email
+          sessionStorage.setItem('orderSuccessful', 'true');
+          
+          // Set order complete state
+          setOrderComplete(true);
+          
           // Send order confirmation email
           await sendOrderConfirmationEmail(orderRef, 'CARD-PAYMENT');
           
+          // Navigate to thank you page with all required data
+          navigate('/thank-you', {
+            state: {
+              orderReference: orderRef,
+              paymentId: 'CARD-PAYMENT',
+              formData,
+              paymentMethod,
+              cartItems: [...cart],
+              cartTotal,
+              orderTotal,
+              shippingCost,
+              discountAmount,
+              discountApplied
+            }
+          });
+          
           setIsSubmitting(false);
-          setOrderComplete(true);
           clearCart();
           localStorage.removeItem('pendingCheckout');
         }, 2000);
@@ -651,11 +724,32 @@ const Checkout = () => {
           const orderRef = `GG-${Math.floor(100000 + Math.random() * 900000)}`;
           setOrderReference(orderRef);
           
+          // Set order success flag to prevent abandoned cart email
+          sessionStorage.setItem('orderSuccessful', 'true');
+          
+          // Set order complete state
+          setOrderComplete(true);
+          
           // Send order confirmation email
           await sendOrderConfirmationEmail(orderRef, 'COD');
           
+          // Navigate to thank you page with all required data
+          navigate('/thank-you', {
+            state: {
+              orderReference: orderRef,
+              paymentId: 'COD',
+              formData,
+              paymentMethod,
+              cartItems: [...cart],
+              cartTotal,
+              orderTotal,
+              shippingCost,
+              discountAmount,
+              discountApplied
+            }
+          });
+          
           setIsSubmitting(false);
-          setOrderComplete(true);
           clearCart();
           localStorage.removeItem('pendingCheckout');
         }, 1500);
@@ -686,54 +780,14 @@ const Checkout = () => {
     return `${formatDate(start)} - ${formatDate(end)}`;
   };
 
-  if (orderComplete) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FaCheckCircle className="text-green-600 text-4xl" />
-            </div>
-            
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">Order Placed Successfully!</h1>
-            <p className="text-gray-600 mb-6">Thank you for your purchase. Your order has been received.</p>
-            
-            <div className="border-t border-b py-4 mb-6">
-              {/* Use stored orderReference instead of generating a new one */}
-              <p className="text-gray-700">Order Reference: <span className="font-bold">{orderReference}</span></p>
-              {paymentId && (
-                <p className="text-gray-700 mt-2">Payment ID: <span className="font-medium">{paymentId}</span></p>
-              )}
-            </div>
-            
-            <div className="mb-8">
-              <h3 className="font-bold text-lg mb-3">Estimated Delivery</h3>
-              <p className="text-green-600 text-lg font-semibold">{getDeliveryDateRange()}</p>
-              <p className="text-gray-500 text-sm">We'll send you shipping confirmation when your item(s) are on the way!</p>
-            </div>
-            
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
-                onClick={() => navigate('/')} 
-                className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Continue Shopping
-              </button>
-              <button 
-                onClick={() => navigate('/account')} 
-                className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                View Order
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO 
+        title="Secure Checkout - GlowGlaz"
+        description="Complete your purchase securely on GlowGlaz. Your personal and payment information is protected with our secure checkout process."
+        noindex={true}
+      />
+      
       {/* Checkout Header & Progress */}
       <div className="bg-white shadow-sm">
         <div className="container mx-auto py-4 px-4">
@@ -890,20 +944,6 @@ const Checkout = () => {
               <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
               <div className="space-y-4">
                 <div className="flex flex-col space-y-4">
-                  <label className="flex items-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      value="card" 
-                      checked={paymentMethod === 'card'} 
-                      onChange={() => setPaymentMethod('card')}
-                      className="h-4 w-4 text-green-600"
-                    />
-                    <span className="ml-2 flex items-center">
-                      <FaCreditCard className="mr-2 text-gray-500" /> 
-                      Credit / Debit Card
-                    </span>
-                  </label>
                   
                   {/* Add Razorpay payment option */}
                   <label className="flex items-center p-4 border border-green-200 bg-green-50 rounded-md cursor-pointer hover:bg-green-100">
@@ -935,87 +975,6 @@ const Checkout = () => {
                   </label>
                 </div>
                 
-                {/* Show card form only if card payment method is selected */}
-                {paymentMethod === 'card' && (
-                  <div className="mt-6 border-t pt-6">
-                    <form className="space-y-4">
-                      <div>
-                        <label htmlFor="cardName" className="block text-sm font-medium text-gray-700 mb-1">Name on Card</label>
-                        <input
-                          type="text"
-                          id="cardName"
-                          name="cardName"
-                          value={cardData.cardName}
-                          onChange={handleCardDataChange}
-                          className={`w-full border ${errors.cardName ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                        />
-                        {errors.cardName && <p className="text-red-500 text-xs mt-1">{errors.cardName}</p>}
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
-                        <input
-                          type="text"
-                          id="cardNumber"
-                          name="cardNumber"
-                          value={cardData.cardNumber}
-                          onChange={handleCardDataChange}
-                          placeholder="1234 5678 9012 3456"
-                          className={`w-full border ${errors.cardNumber ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                        />
-                        {errors.cardNumber && <p className="text-red-500 text-xs mt-1">{errors.cardNumber}</p>}
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
-                          <input
-                            type="text"
-                            id="expiryDate"
-                            name="expiryDate"
-                            value={cardData.expiryDate}
-                            onChange={handleCardDataChange}
-                            placeholder="MM/YY"
-                            className={`w-full border ${errors.expiryDate ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                          />
-                          {errors.expiryDate && <p className="text-red-500 text-xs mt-1">{errors.expiryDate}</p>}
-                        </div>
-                        <div>
-                          <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">CVV</label>
-                          <input
-                            type="text"
-                            id="cvv"
-                            name="cvv"
-                            value={cardData.cvv}
-                            onChange={handleCardDataChange}
-                            placeholder="123"
-                            className={`w-full border ${errors.cvv ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500`}
-                          />
-                          {errors.cvv && <p className="text-red-500 text-xs mt-1">{errors.cvv}</p>}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center text-sm text-gray-500 mt-4">
-                        <FaLock className="mr-2" /> 
-                        Your payment information is secured with SSL encryption
-                      </div>
-                      
-                      {/* Payment Trust Indicators */}
-                      <div className="mt-6 pt-4 border-t">
-                        <div className="flex items-center justify-center mb-4">
-                          <FaLock className="text-green-600 mr-2" />
-                          <span className="text-sm font-medium text-green-600">Secure Payment Processing</span>
-                        </div>
-                        <div className="flex flex-wrap justify-center gap-4">
-                          <img src="https://cdn.iconscout.com/icon/free/png-256/visa-3-226460.png" alt="Visa" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                          <img src="https://cdn.iconscout.com/icon/free/png-256/mastercard-6-226462.png" alt="Mastercard" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                          <img src="https://cdn.iconscout.com/icon/free/png-256/american-express-44503.png" alt="American Express" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                          <img src="https://cdn.iconscout.com/icon/free/png-256/rupay-1446048-1224020.png" alt="RuPay" className="h-6 grayscale hover:grayscale-0 transition-all" />
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                )}
                 
                 {/* Show Razorpay information */}
                 {paymentMethod === 'razorpay' && (
@@ -1076,25 +1035,32 @@ const Checkout = () => {
           
           {/* Order Summary */}
           <div className="lg:w-1/3">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-              <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24 border border-gray-200">
+              <h2 className="text-xl font-semibold mb-4 flex items-center border-b pb-3">
+                <FaShoppingCart className="mr-2 text-green-600" />
+                Order Summary
+                <span className="ml-2 text-sm bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{cart.length} item{cart.length !== 1 ? 's' : ''}</span>
+              </h2>
               
-              <div className="max-h-60 overflow-y-auto mb-4">
+              <div className="max-h-60 overflow-y-auto mb-4 pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {cart.map(item => (
-                  <div key={item.id} className="flex py-2 border-b">
-                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                  <div key={item.id} className="flex py-3 border-b hover:bg-gray-50 rounded-md transition-colors">
+                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 bg-white p-1">
                       <img 
                         src={item.image} 
                         alt={item.title} 
-                        className="h-full w-full object-cover object-center"
+                        className="h-full w-full object-contain object-center"
                       />
                     </div>
                     <div className="ml-4 flex flex-1 flex-col">
                       <div className="flex justify-between text-sm font-medium text-gray-900">
-                        <h3 className="line-clamp-1">{item.title}</h3>
+                        <h3 className="line-clamp-2 text-blue-700 hover:text-blue-800">{item.title}</h3>
                       </div>
-                      <div className="flex mt-auto justify-between text-sm">
-                        <p className="text-gray-500">Qty {item.quantity}</p>
+                      <div className="flex mt-auto justify-between items-center">
+                        <div>
+                          <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
+                          <p className="text-xs text-gray-500 mt-1">Unit Price: {formatPrice(item.price)}</p>
+                        </div>
                         <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
                       </div>
                     </div>
@@ -1102,61 +1068,102 @@ const Checkout = () => {
                 ))}
               </div>
               
-              <div className="border-t pt-4">
-                <div className="flex justify-between py-2">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span>{formatPrice(cartTotal)}</span>
+              <div className="border-t pt-4 space-y-2">
+                <div className="flex justify-between py-2 text-gray-700">
+                  <span>Subtotal ({cart.reduce((acc, item) => acc + item.quantity, 0)} items)</span>
+                  <span className="font-medium">{formatPrice(cartTotal)}</span>
                 </div>
-                <div className="flex justify-between py-2">
-                  <span className="text-gray-600">Shipping</span>
-                  <span>{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
+                <div className="flex justify-between py-2 text-gray-700">
+                  <span>Shipping</span>
+                  <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
                 </div>
                 
                 {/* Add discount row if applied */}
                 {discountApplied && (
                   <div className="flex justify-between py-2 text-green-600">
-                    <span>YouTube Discount (10%)</span>
-                    <span>-{formatPrice(discountAmount)}</span>
+                    <span className="flex items-center">
+                      <FaYoutube className="mr-1" />
+                      YouTube Discount (10%)
+                    </span>
+                    <span className="font-medium">-{formatPrice(discountAmount)}</span>
                   </div>
                 )}
                 
-                <div className="flex justify-between py-2 font-bold">
-                  <span>Total</span>
-                  <span>{formatPrice(orderTotal)}</span>
+                {/* Estimated tax row */}
+                <div className="flex justify-between py-2 text-gray-700">
+                  <span className="flex items-center">
+                    <span>Estimated Tax</span>
+                    <span className="ml-1 text-xs text-gray-500">(Included)</span>
+                  </span>
+                  <span>₹0.00</span>
+                </div>
+
+                <div className="my-4 border-t border-b py-4">
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span className="text-green-700">{formatPrice(orderTotal)}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-gray-500 text-right">
+                    Including GST and all applicable taxes
+                  </div>
+                </div>
+                
+                {/* Order details section */}
+                <div className="bg-gray-50 rounded-md p-3 space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Payment Method</span>
+                    <span className="font-medium flex items-center">
+                      {paymentMethod === 'razorpay' && <img src="https://razorpay.com/favicon.png" alt="Razorpay" className="w-4 h-4 mr-1" />}
+                      {paymentMethod === 'card' && <FaCreditCard className="mr-1" />}
+                      {paymentMethod === 'cod' && <span className="mr-1">💵</span>}
+                      {paymentMethod === 'razorpay' ? 'Razorpay' : 
+                       paymentMethod === 'card' ? 'Credit Card' : 'Cash on Delivery'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Estimated Delivery</span>
+                    <span className="font-medium">{getDeliveryDateRange()}</span>
+                  </div>
                 </div>
                 
                 {shippingCost === 0 && (
                   <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded-md flex items-center">
-                    <FaShippingFast className="mr-1" />
-                    <span>Free shipping applied!</span>
+                    <FaShippingFast className="mr-2" />
+                    <span>Free shipping on orders over ₹3,000!</span>
                   </div>
                 )}
                 
                 {/* Add YouTube discount badge if applied */}
                 {discountApplied && (
                   <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-md flex items-center">
-                    <FaYoutube className="mr-1" />
+                    <FaYoutube className="mr-2" />
                     <span>10% YouTube subscriber discount applied!</span>
                   </div>
                 )}
               </div>
               
               {/* Trust Seals in Order Summary */}
-              <div className="mt-4 pt-4 border-t">
-                <div className="flex items-center justify-center mb-2">
-                  <FaRegCreditCard className="text-gray-500 mr-2" />
-                  <span className="text-xs font-medium text-gray-500">PAYMENT METHODS</span>
+              <div className="mt-6 pt-4 border-t">
+                <div className="flex items-center justify-center mb-3">
+                  <FaLock className="text-green-600 mr-2" />
+                  <span className="text-sm font-medium text-gray-700">SECURE CHECKOUT</span>
                 </div>
-                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                <div className="flex flex-wrap justify-center gap-3 mb-4">
                   <img src="https://cdn.iconscout.com/icon/free/png-256/visa-3-226460.png" alt="Visa" className="h-8" />
                   <img src="https://cdn.iconscout.com/icon/free/png-256/mastercard-6-226462.png" alt="Mastercard" className="h-8" />
                   <img src="https://cdn.iconscout.com/icon/free/png-256/american-express-44503.png" alt="Amex" className="h-8" />
+                  <img src="https://cdn.razorpay.com/static/assets/logo/upi.svg" alt="UPI" className="h-8" />
                 </div>
                 
-                <div className="flex items-center justify-center">
-                  <div className="flex items-center border border-gray-200 rounded-md px-3 py-2 bg-gray-50">
-                    <FaLock className="text-green-600 mr-2" />
-                    <span className="text-xs text-gray-600">Your data is protected</span>
+                <div className="grid grid-cols-2 gap-2 text-xs text-center mt-3">
+                  <div className="flex flex-col items-center border border-gray-200 rounded-md px-2 py-2 bg-gray-50">
+                    <FaShieldAlt className="text-green-600 mb-1" />
+                    <span className="text-gray-700">Secure Payment</span>
+                  </div>
+                  <div className="flex flex-col items-center border border-gray-200 rounded-md px-2 py-2 bg-gray-50">
+                    <FaMedal className="text-blue-600 mb-1" />
+                    <span className="text-gray-700">Quality Guarantee</span>
                   </div>
                 </div>
               </div>

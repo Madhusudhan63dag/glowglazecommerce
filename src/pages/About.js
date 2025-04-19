@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaLeaf, FaHeart, FaShieldAlt, FaCheck, FaMedal, FaCertificate } from 'react-icons/fa';
 import productData from '../utils/data/product';
+import SEO from '../components/SEO';
 
 const About = () => {
   const location = useLocation();
@@ -87,6 +88,12 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO 
+        title="About GlowGlaz - Our Mission & Vision | Ayurvedic Health Products"
+        description="Learn about GlowGlaz's mission to provide authentic Ayurvedic and natural health solutions. Discover our story, values, and commitment to quality products."
+        canonical="https://glowglaz.com/about"
+      />
+      
       {/* Hero Section with Banner */}
       <section className="relative overflow-hidden">
         <div

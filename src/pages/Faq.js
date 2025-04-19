@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaSearch, FaChevronDown, FaChevronUp, FaTruck, FaBox, FaExchangeAlt, FaCreditCard } from 'react-icons/fa';
 import productData from '../utils/data/product';
+import SEO from '../components/SEO';
 
 const Faq = () => {
   const location = useLocation();
@@ -158,6 +159,12 @@ const Faq = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO 
+        title="Frequently Asked Questions - GlowGlaz"
+        description="Find answers to common questions about GlowGlaz products, shipping, returns, and more. Get the information you need about our natural Ayurvedic health solutions."
+        canonical="https://glowglaz.com/faq"
+      />
+      
       {/* Banner Section */}
       <section className="relative overflow-hidden">
         <div

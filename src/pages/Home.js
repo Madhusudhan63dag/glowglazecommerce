@@ -6,6 +6,7 @@ import images from '../utils/data/icons';
 import Card4 from '../components/Card4';
 import productData from '../utils/data/product';
 import { useNavigate, useLocation } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 const Home = () => {
   const location = useLocation();
@@ -283,6 +284,12 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      <SEO 
+        title="GlowGlaz - Ayurvedic & Natural Health Products"
+        description="Discover authentic Ayurvedic and natural wellness solutions at GlowGlaz. Shop our range of herbal supplements, skincare, and premium health products."
+        canonical="https://glowglaz.com"
+      />
+      
       <section className="relative overflow-hidden">
         <div
           className={`flex transition-transform ${

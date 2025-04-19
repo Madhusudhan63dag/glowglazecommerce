@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 
 // Import pages
 import Home from './pages/Home';
@@ -11,6 +12,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Faq from './pages/Faq';
 import Checkout from './pages/Checkout';
+import ThankYou from './pages/ThankYou';
 
 // Import components
 import Navbar from './components/Navbar';
@@ -26,32 +28,35 @@ import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
-    <CartProvider>
-      <Router>
-        <div className="App min-h-screen flex flex-col">
-          <Navbar />
-          <main className="flex-grow">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/trending" element={<Trending />} />
-              <Route path="/trendproduct" element={<Trendpage />} />
-              <Route path="/product/:id" element={<ProductPage />} />
-              <Route path="/offers" element={<Offer />} />
-              <Route path="/deals/:dealType" element={<DealsPage />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/faq" element={<Faq />} />
-              <Route path="/shipping" element={<Auth />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/checkout" element={<Checkout />} />
-              {/* Add other routes as needed */}
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </CartProvider>
+    <HelmetProvider>
+      <CartProvider>
+        <Router>
+          <div className="App min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/trending" element={<Trending />} />
+                <Route path="/trendproduct" element={<Trendpage />} />
+                <Route path="/product/:id" element={<ProductPage />} />
+                <Route path="/offers" element={<Offer />} />
+                <Route path="/deals/:dealType" element={<DealsPage />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/faq" element={<Faq />} />
+                <Route path="/shipping" element={<Auth />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/thank-you" element={<ThankYou />} />
+                {/* Add other routes as needed */}
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </Router>
+      </CartProvider>
+    </HelmetProvider>
   );
 }
 

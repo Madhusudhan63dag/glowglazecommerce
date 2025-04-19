@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaClock, FaFacebook, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
 import productData from '../utils/data/product';
+import SEO from '../components/SEO';
 
 const Contact = () => {
   const location = useLocation();
@@ -174,6 +175,12 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO 
+        title="Contact Us - GlowGlaz"
+        description="Get in touch with the GlowGlaz team for questions about our Ayurvedic products, orders, or customer support. Find our contact details, hours, and location information."
+        canonical="https://glowglaz.com/contact"
+      />
+      
       {/* Banner Section */}
       <section className="relative overflow-hidden">
         <div

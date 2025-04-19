@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaShieldAlt, FaUserLock, FaCookieBite, FaChevronDown, FaChevronUp, FaClipboard } from 'react-icons/fa';
+import SEO from '../components/SEO';
 import productData from '../utils/data/product';
 
 const Privacy = () => {
@@ -124,6 +125,12 @@ const Privacy = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO 
+        title="Privacy Policy - GlowGlaz"
+        description="Learn how GlowGlaz protects your personal information and privacy. View our comprehensive privacy policy and data protection practices."
+        canonical="https://glowglaz.com/privacy"
+      />
+      
       {/* Banner Section */}
       <section className="relative overflow-hidden">
         <div

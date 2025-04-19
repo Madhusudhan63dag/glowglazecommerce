@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaFileContract, FaGavel, FaBalanceScale, FaClipboard, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import SEO from '../components/SEO';
 import productData from '../utils/data/product';
 
 const Terms = () => {
@@ -158,7 +159,12 @@ const Terms = () => {
 
   return (
     <div className="min-h-screen bg-white">
-
+      <SEO 
+        title="Terms and Conditions - GlowGlaz"
+        description="Read the terms and conditions that govern the use of GlowGlaz products and services. Learn about our policies, user responsibilities, and legal guidelines."
+        canonical="https://glowglaz.com/terms"
+      />
+      
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">

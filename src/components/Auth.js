@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { FaShippingFast, FaArrowLeft } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 
+// Add backend API URL - Fixed to properly use environment variables or fallback
+const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
+
 const Auth = () => {
   const { cart } = useCart();
   const navigate = useNavigate();
@@ -17,6 +20,7 @@ const Auth = () => {
     pincode: '',
   });
   const [errors, setErrors] = useState({});
+  const [formTouched, setFormTouched] = useState(false);
 
   // Redirect to home if cart is empty
   useEffect(() => {
@@ -33,6 +37,10 @@ const Auth = () => {
         const { formData: savedFormData } = JSON.parse(savedCheckout);
         if (savedFormData) {
           setFormData(savedFormData);
+          // Set form as touched if we loaded saved data that has an email
+          if (savedFormData.email) {
+            setFormTouched(true);
+          }
         }
       } catch (error) {
         console.error('Error parsing saved checkout data', error);
@@ -40,12 +48,90 @@ const Auth = () => {
     }
   }, []);
 
+  // Track when user leaves the page without completing the order
+  useEffect(() => {
+    return () => {
+      // Only send abandoned cart email if:
+      // 1. The form has been touched (user entered data)
+      // 2. We have the user's email
+      // 3. No order success flag is set in sessionStorage
+      const orderSuccessFlag = sessionStorage.getItem('orderSuccessful');
+      
+      if (formTouched && formData.email && !orderSuccessFlag) {
+        sendAbandonedCartEmail();
+      }
+    };
+  }, [formData, formTouched]);
+
+  // Function to send abandoned cart email
+  const sendAbandonedCartEmail = async () => {
+    try {
+      if (!formData.email) return;
+      
+      // Format cart items into a proper products array structure for the email API
+      const products = cart.map(item => ({
+        name: item.title,
+        quantity: item.quantity,
+        price: (typeof item.price === 'number') ? item.price.toFixed(2) : item.price,
+        image: item.image
+      }));
+
+      // Calculate cart total
+      const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+      
+      const orderDetails = {
+        orderNumber: `PENDING-${Date.now()}`,
+        products,
+        totalAmount: cartTotal,
+        currency: '₹'
+      };
+      
+      const customerDetails = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.pincode
+      };
+      
+      // Use direct fetch without AbortController
+      const response = await fetch(`${API_URL}/send-abandoned-order-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerEmail: formData.email,
+          orderDetails,
+          customerDetails
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      
+      console.log("Abandoned cart email sent for shipping page");
+    } catch (error) {
+      console.warn('Error sending abandoned cart email from shipping page:', error.message || error);
+      // Silent fail for abandoned cart emails - non-critical functionality
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    
+    // Mark form as touched when user enters data
+    if (!formTouched) {
+      setFormTouched(true);
+    }
     
     // Clear error when field is edited
     if (errors[name]) {
