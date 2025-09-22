@@ -1,3 +1,24 @@
-# https://www.robotstxt.org/robotstxt.html
+# GlowGlaz robots.txt
 User-agent: *
-Disallow:
+Allow: /
+
+# Specify sitemap location
+Sitemap: https://glowglaz.com/sitemap.xml
+
+# Disallow crawling of administrative and private areas
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /account/
+Disallow: /*?search=
+Disallow: /*?sort=
+Disallow: /*?filter=
+
+# Allow crawling of important content areas
+Allow: /products/
+Allow: /categories/
+Allow: /about/
+Allow: /contact/
+
+# Crawl delay to prevent server overload
+Crawl-delay: 10

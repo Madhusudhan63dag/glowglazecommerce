@@ -8,6 +8,7 @@ import productData from '../utils/data/product';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { homeBanners } from '../utils/data/banner.js';
+import { generateWebsiteSchema, generateHomePageSchema } from '../utils/seo/homeSchemaGenerator';
 
 const Home = () => {
   const location = useLocation();
@@ -320,6 +321,18 @@ const Home = () => {
         title="GlowGlaz - Ayurvedic & Natural Health Products"
         description="Discover authentic Ayurvedic and natural wellness solutions at GlowGlaz. Shop our range of herbal supplements, skincare, and premium health products."
         canonical="https://glowglaz.com"
+        type="website"
+        schema={{
+          ...generateWebsiteSchema(),
+          '@graph': [generateWebsiteSchema(), generateHomePageSchema()]
+        }}
+        meta={{
+          'og:type': 'website',
+          'og:image': homeBanners[0]?.image || '%PUBLIC_URL%/og-image.jpg',
+          'og:image:width': '1200',
+          'og:image:height': '630',
+          'keywords': 'Ayurvedic products, natural health, herbal supplements, wellness products, organic skincare, GlowGlaz, health products',
+        }}
       />
       
       <section className="relative overflow-hidden">

@@ -1,8 +1,6 @@
-import productData from '../data/product';
-
 const BASE_URL = 'https://glowglaz.com'; // Replace with your actual domain
 
-const generateSitemap = () => {
+const generateSitemap = (products) => {
   const today = new Date().toISOString();
   
   // Static routes
@@ -17,7 +15,7 @@ const generateSitemap = () => {
   ];
 
   // Generate product URLs
-  const productUrls = productData.productDetailData.map(product => `/product/${product.id}`);
+  const productUrls = products.map(product => `/product/${product.id}`);
 
   // Combine all URLs
   const allUrls = [...staticRoutes, ...productUrls];
@@ -36,18 +34,6 @@ ${allUrls.map(url => `  <url>
   return sitemap;
 };
 
-export const generateSitemapAndSave = async () => {
-  try {
-    const sitemap = generateSitemap();
-    
-    // In a real application, you would save this to your public folder
-    // This could be done during build time or through an API endpoint
-    // For now, we'll just return the sitemap string
-    return sitemap;
-  } catch (error) {
-    console.error('Error generating sitemap:', error);
-    throw error;
-  }
+module.exports = {
+  generateSitemap
 };
-
-export default generateSitemap;
