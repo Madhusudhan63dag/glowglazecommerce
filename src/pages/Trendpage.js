@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaFilter, FaShoppingCart } from 'react-icons/fa';
 import productData from '../utils/data/product';
 import { useCart } from '../context/CartContext';
+import { trendingBanner } from "../utils/data/banner";
+
 
 const Trendpage = () => {
   const navigate = useNavigate();
@@ -19,6 +21,8 @@ const Trendpage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoryData, setSelectedCategoryData] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
   
   // Load all products when component mounts
   useEffect(() => {
@@ -72,20 +76,7 @@ const Trendpage = () => {
   }, [products, searchTerm, priceRange, sortOrder]);
   
   // Get banners from selected category or default banners
-  const banners = selectedCategoryData?.banner || [
-    {
-      id: 1,
-      imageUrl: "https://placehold.co/1920x400/222222/FFFFFF/png?text=Trending+Products",
-      heading: "Discover What's Hot",
-      subheading: "Explore our most popular health and wellness products"
-    },
-    {
-      id: 2,
-      imageUrl: "https://placehold.co/1920x400/003366/FFFFFF/png?text=Best+Sellers",
-      heading: "Customer Favorites",
-      subheading: "The products our customers love the most"
-    }
-  ];
+  const banners = trendingBanner;
   
   // Banner animation effects
   useEffect(() => {
@@ -217,6 +208,14 @@ const Trendpage = () => {
       label: cat.title
     }))
   ];
+  const getBannerImageUrl = (banner) => {
+    // Check if banner has responsive imageUrl object
+    if (typeof banner.imageUrl === 'object' && banner.imageUrl !== null) {
+      return isMobile ? banner.imageUrl.mobile : banner.imageUrl.desktop;
+    }
+    // Fallback to string imageUrl for backward compatibility
+    return banner.imageUrl;
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -234,23 +233,25 @@ const Trendpage = () => {
         >
           {banners.map((banner, index) => (
             <div key={banner.id} className="w-full flex-shrink-0">
-              <div
-                className="relative w-full h-[300px] bg-cover bg-center flex items-center justify-center"
-                style={{ backgroundImage: `url(${banner.imageUrl})` }}
-              >
-
+              <div className={`relative w-full h-full bg-gray-100`}>
+                <img
+                  src={getBannerImageUrl(banner)}
+                  alt={banner.heading || `Banner ${index + 1}`}
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           ))}
         </div>
         
+        {/* Banner Navigation Dots */}
         {banners.length > 1 && (
-          <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          <div className={`absolute ${isMobile ? 'bottom-4' : 'bottom-6'} left-1/2 transform -translate-x-1/2 flex space-x-2`}>
             {banners.map((_, index) => (
               <button
                 key={index}
-                className={`w-3 h-3 rounded-full ${
-                  currentBanner === index ? 'bg-white' : 'bg-gray-400'
+                className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} rounded-full transition-colors duration-200 ${
+                  currentBanner === index ? 'bg-white shadow-lg' : 'bg-gray-400 hover:bg-gray-300'
                 }`}
                 onClick={() => goToBanner(index)}
                 aria-label={`Go to slide ${index + 1}`}

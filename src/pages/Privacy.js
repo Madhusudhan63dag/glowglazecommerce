@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { FaShieldAlt, FaUserLock, FaCookieBite, FaChevronDown, FaChevronUp, FaClipboard } from 'react-icons/fa';
 import SEO from '../components/SEO';
 import productData from '../utils/data/product';
+import {privacyBanner} from '../utils/data/banner';
+
 
 const Privacy = () => {
   const location = useLocation();
@@ -10,9 +12,11 @@ const Privacy = () => {
   const [animationPhase, setAnimationPhase] = useState('idle');
   const [prevBanner, setPrevBanner] = useState(0);
   const [activeSection, setActiveSection] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
 
   // Get data from product.js
-  const banners = productData.privacyBanner;
+  const banners = privacyBanner;
   const privacyPolicy = productData.privacyPolicy;
 
   // Scroll to top when component mounts
@@ -122,6 +126,15 @@ const Privacy = () => {
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
+  const getBannerImageUrl = (banner) => {
+    // Check if banner has responsive imageUrl object
+    if (typeof banner.imageUrl === 'object' && banner.imageUrl !== null) {
+      return isMobile ? banner.imageUrl.mobile : banner.imageUrl.desktop;
+    }
+    // Fallback to string imageUrl for backward compatibility
+    return banner.imageUrl;
+  };
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -145,22 +158,25 @@ const Privacy = () => {
         >
           {banners.map((banner, index) => (
             <div key={banner.id} className="w-full flex-shrink-0">
-              <div
-                className="relative w-full h-[300px] bg-cover bg-center flex items-center justify-center"
-                style={{ backgroundImage: `url(${banner.imageUrl})` }}
-              >
+              <div className={`relative w-full h-full bg-gray-100`}>
+                <img
+                  src={getBannerImageUrl(banner)}
+                  alt={banner.heading || `Banner ${index + 1}`}
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           ))}
         </div>
         
+        {/* Banner Navigation Dots */}
         {banners.length > 1 && (
-          <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          <div className={`absolute ${isMobile ? 'bottom-4' : 'bottom-6'} left-1/2 transform -translate-x-1/2 flex space-x-2`}>
             {banners.map((_, index) => (
               <button
                 key={index}
-                className={`w-3 h-3 rounded-full ${
-                  currentBanner === index ? 'bg-white' : 'bg-gray-400'
+                className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} rounded-full transition-colors duration-200 ${
+                  currentBanner === index ? 'bg-white shadow-lg' : 'bg-gray-400 hover:bg-gray-300'
                 }`}
                 onClick={() => goToBanner(index)}
                 aria-label={`Go to slide ${index + 1}`}

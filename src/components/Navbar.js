@@ -77,7 +77,16 @@ const Navbar = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      navigate(`/trending?search=${encodeURIComponent(searchTerm.trim())}`);
+      // If we have suggestions and exact match, navigate to the product
+      const exactMatch = searchSuggestions.find(
+        product => product.title.toLowerCase() === searchTerm.trim().toLowerCase()
+      );
+      if (exactMatch) {
+        navigate(`/product/${exactMatch.id}`);
+      } else {
+        // If no exact match, go to search results
+        navigate(`/trending?search=${encodeURIComponent(searchTerm.trim())}`);
+      }
       setSearchTerm('');
       setShowSuggestions(false);
       setShowMobileSearch(false);
@@ -85,7 +94,7 @@ const Navbar = () => {
   };
   
   const handleSuggestionClick = (suggestion) => {
-    navigate(`/trending?search=${encodeURIComponent(suggestion.title.trim())}`);
+    navigate(`/product/${suggestion.id}`);
     setSearchTerm('');
     setShowSuggestions(false);
     setShowMobileSearch(false);
@@ -123,7 +132,7 @@ const Navbar = () => {
 
       {/* Main Header */}
       <div className="bg-white shadow-sm">
-        <div className="py-1 sm:py-2 md:py-4 px-2 sm:px-4">
+        <div className="py-1 sm:py-2 md:py-0 px-2 sm:px-4">
           <div className="flex items-center justify-between gap-1 sm:gap-4">
             <div className='flex items-center gap-1 sm:gap-4'>
               {/* Mobile Menu Button */}

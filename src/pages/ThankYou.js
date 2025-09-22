@@ -214,13 +214,13 @@ const ThankYou = () => {
                     <span>{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
                   </div>
                   
-                  {discountApplied && (
+                  {/* {discountApplied && (
                     <div className="flex justify-between text-green-600">
                       <span>YouTube Discount (10%)</span>
                       <span>-{formatPrice(discountAmount)}</span>
                     </div>
                   )}
-                  
+                   */}
                   <div className="flex justify-between font-bold text-lg pt-2 border-t">
                     <span>Total</span>
                     <span className="text-green-700">{formatPrice(orderTotal)}</span>
@@ -309,10 +309,10 @@ const ThankYou = () => {
                 </div>
               </div>
               <div className="flex gap-4">
-                <a href="mailto:support@glowglaz.com" className="text-blue-600 hover:text-blue-800 flex items-center">
+                <a href="mailto:customercareproductcenter@gmail.com" className="text-blue-600 hover:text-blue-800 flex items-center">
                   <FaEnvelope className="mr-2" /> Email Support
                 </a>
-                <a href="tel:+919876543210" className="text-blue-600 hover:text-blue-800 flex items-center">
+                <a href="tel:+919392277389" className="text-blue-600 hover:text-blue-800 flex items-center">
                   <FaPhone className="mr-2" /> Call Us
                 </a>
               </div>

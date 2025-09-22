@@ -37,16 +37,16 @@ const Card2 = ({ card }) => {
             <div>
                 <div className="relative">
                     <img 
-                      src={"https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image"} 
+                      src={card.image} 
                       alt={card.name} 
                       className='w-full object-cover rounded-md' 
                     />
-                    <div className='absolute top-0 right-0'>
+                    {/* <div className='absolute top-0 right-0'>
                       <div className="relative">
                         <img src={news} alt="Product" className='w-10 sm:w-12 md:w-auto' />
                         <p className='absolute top-1 sm:top-2 left-3 sm:left-10 text-xs sm:text-sm md:text-base font-bold text-white'>New</p>
                       </div>
-                    </div>
+                    </div> */}
                 </div>
                 <div className='text-center mt-2 sm:mt-3 md:mt-4'>
                     <div className="relative group h-[1.5em]">

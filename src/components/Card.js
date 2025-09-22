@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 
-const Card = ({card}) => {
+const Card = ({card, image}) => {
   const [fontSize, setFontSize] = useState('');
   const textRef = useRef(null);
 
@@ -20,12 +20,12 @@ const Card = ({card}) => {
 
   return (
     <div className="w-full">
-        <a href="#">
+        <a href={card.link}>
             <div className="card">
                 <div className="card-body w-full flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 hover:scale-105 transition-transform duration-300 ease-in-out">
                     <div className="relative flex flex-col items-center w-full">
                         <img 
-                            src={"https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image"} 
+                            src={card.image} 
                             alt={card.name} 
                             className='rounded-tr-[20px] sm:rounded-tr-[30px] md:rounded-tr-[40px] 
                                       rounded-tl-[20px] sm:rounded-tl-[30px] md:rounded-tl-[40px] 

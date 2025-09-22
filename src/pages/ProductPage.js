@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { FaHeart, FaFacebookF, FaTwitter, FaPinterestP, FaGoogle } from 'react-icons/fa';
+import { FaHeart, FaFacebookF, FaTwitter, FaPinterestP, FaGoogle, FaInstagram, FaYoutube } from 'react-icons/fa';
 import productData from '../utils/data/product';
 import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
@@ -164,11 +164,10 @@ const ProductPage = () => {
               <div className="mb-8">
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-700 font-medium">Share:</span>
-                  <button className="text-gray-500 hover:text-red-500"><FaHeart /></button>
-                  <button className="text-gray-500 hover:text-blue-600"><FaFacebookF /></button>
-                  <button className="text-gray-500 hover:text-blue-400"><FaTwitter /></button>
-                  <button className="text-gray-500 hover:text-red-600"><FaPinterestP /></button>
-                  <button className="text-gray-500 hover:text-red-500"><FaGoogle /></button>
+                  <a href='https://www.facebook.com/glowglazofficial'><button className="text-gray-500 hover:text-blue-600"><FaFacebookF /></button></a>
+                  <a href='https://www.instagram.com/glowglazofficial'><button className="text-gray-500 hover:text-pink-600"><FaInstagram /></button></a>
+                  {/* <a href='https://www.google.com'><button className="text-gray-500 hover:text-orange-500"><FaGoogle /></button></a> */}
+                  <a href='https://www.youtube.com/@glowglaz'><button className="text-gray-500 hover:text-red-400"><FaYoutube /></button></a>
                 </div>
               </div>
               

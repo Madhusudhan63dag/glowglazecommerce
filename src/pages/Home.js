@@ -7,14 +7,10 @@ import Card4 from '../components/Card4';
 import productData from '../utils/data/product';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { homeBanners } from '../utils/data/banner.js';
 
 const Home = () => {
   const location = useLocation();
-  
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
-  
   const [currentBanner, setCurrentBanner] = useState(0);
   const [animationPhase, setAnimationPhase] = useState('idle');
   const [prevBanner, setPrevBanner] = useState(0);
@@ -22,16 +18,65 @@ const Home = () => {
   const trending = productData.trending;
   const newproduct = productData.newproduct;
   const brand = productData.brand;
-  const itemOfWeekProducts = productData.productData;
-
+  const itemOfWeekProducts = productData.getItemOfWeekProducts;
   const newCardsRef = useRef(null);
   const dietCardsRef = useRef(null);
   const brandCardsRef = useRef(null);
   const itemOfWeekRef = useRef(null);
-
   const [newCardsPosition, setNewCardsPosition] = useState(0);
   const [itemOfWeekPosition, setItemOfWeekPosition] = useState(0);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
+  const banners = homeBanners;
+
+  useEffect(() => {
+    let intervalId;
+    
+    if (autoScrollEnabled && !isTransitioning) {
+      intervalId = setInterval(() => {
+        if (dietCardsRef.current) {
+          const containerWidth = dietCardsRef.current.clientWidth;
+          const scrollAmount = Math.min(280, containerWidth * 0.8);
+          const maxScroll = dietCardsRef.current.scrollWidth - dietCardsRef.current.clientWidth;
+          const currentScroll = dietCardsRef.current.scrollLeft;
+          
+          // Check if we're near the end (accounting for duplicated content)
+          if (currentScroll + scrollAmount >= maxScroll * 0.5) {
+            // Smoothly transition to continue the loop
+            setIsTransitioning(true);
+            dietCardsRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            
+            // After animation completes, reset to beginning
+            setTimeout(() => {
+              dietCardsRef.current.scrollTo({ left: 0, behavior: 'auto' });
+              setIsTransitioning(false);
+            }, 500);
+          } else {
+            dietCardsRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          }
+        }
+      }, 1500);
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [autoScrollEnabled, isTransitioning]);
+  
+  const handleCarouselMouseEnter = () => {
+    setAutoScrollEnabled(false);
+  };
+
+  const handleCarouselMouseLeave = () => {
+    setAutoScrollEnabled(true);
+  };
+
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+  
   const navigate = useNavigate();
 
   const handleProductClick = (productId) => {
@@ -42,7 +87,13 @@ const Home = () => {
     if (event) {
       event.preventDefault();
     }
-    navigate(`/trending?category=${card.name.toLowerCase().replace(' ', '-')}`);
+    if (card.link) {
+      navigate(card.link);
+    } else {
+      // Fallback if link is not provided
+      const category = card.title ? card.title.toLowerCase().replace(' ', '-') : '';
+      navigate(`/trending?category=${category}`);
+    }
   };
 
   const handleBrandClick = (brand, event) => {
@@ -63,25 +114,6 @@ const Home = () => {
       navigate(`/deals/${dealRoute}`);
     }
   };
-
-  const banners = [
-    {
-      id: 1,
-      imageUrl: "https://placehold.co/1080x600/222222/FFFFFF/png?text=Banner+1",
-    },
-    {
-      id: 2,
-      imageUrl: "https://placehold.co/1080x600/003366/FFFFFF/png?text=Banner+2",
-    },
-    {
-      id: 3,
-      imageUrl: "https://placehold.co/1080x600/660033/FFFFFF/png?text=Banner+3",
-    },
-    {
-      id: 4,
-      imageUrl: "https://placehold.co/1080x600/336600/FFFFFF/png?text=Banner+4",
-    }
-  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -324,6 +356,7 @@ const Home = () => {
           ))}
         </div>
       </section>
+
       {/* trending section */}
       <section className="container mx-auto py-5 md:py-10 px-4">
         <h1 className="text-center font-bold text-2xl md:text-3xl lg:text-4xl mb-4 md:mb-6">Trending Now</h1>
@@ -336,7 +369,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="container mx-auto py-5 md:py-10 px-4 relative">
+      <section className="py-5 md:py-10 px-4 relative">
         <h1 className="text-center font-bold text-2xl md:text-3xl lg:text-4xl mb-4 md:mb-6">What's New</h1>
 
         <div className="absolute top-1/2 left-0 z-10 w-full flex justify-between px-2 md:px-4">
@@ -380,6 +413,7 @@ const Home = () => {
             msOverflowStyle: 'none'
           }}
         >
+          {console.log(newproduct)}
           {newproduct.map((card, index) => (
             <div
               key={index}
@@ -423,6 +457,8 @@ const Home = () => {
             onClick={scrollLeftDiet}
             className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll left"
+            onMouseEnter={() => setAutoScrollEnabled(false)}
+            onMouseLeave={() => setAutoScrollEnabled(true)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -438,6 +474,8 @@ const Home = () => {
             onClick={scrollRightDiet}
             className="bg-white shadow-lg rounded-full p-2 md:p-3 hover:bg-gray-100 transition-colors"
             aria-label="Scroll right"
+            onMouseEnter={() => setAutoScrollEnabled(false)}
+            onMouseLeave={() => setAutoScrollEnabled(true)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -457,13 +495,16 @@ const Home = () => {
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            scrollSnapType: 'x mandatory'
+            scrollSnapType: 'none' // Remove snap for smooth infinite scroll
           }}
+          onMouseEnter={handleCarouselMouseEnter}
+          onMouseLeave={handleCarouselMouseLeave}
         >
+          {/* Render original content */}
           {images.map((card, index) => (
             <div
-              key={index}
-              className={`flex-shrink-0 snap-center transition-all duration-300 ${index < 4 ? 'scale-100' : 'scale-95 opacity-90'}`}
+              key={`original-${index}`}
+              className="flex-shrink-0 transition-all duration-300"
               style={{
                 width: 'calc(33.333% - 8px)',
                 minWidth: '100px',
@@ -471,24 +512,23 @@ const Home = () => {
                 borderRadius: '8px'
               }}
             >
-              <div className={`${index < 4 ? 'relative overflow-visible' : ''}`}>
-                <Card3 card={card} />
-              </div>
+              <Card3 card={card} />
             </div>
           ))}
-        </div>
-
-        <div className="flex justify-center mt-4 gap-2">
-          {[0, 1].map((group) => (
-            <button
-              key={group}
-              className={`w-4 md:w-8 h-2 rounded-full ${group === 0 ? 'bg-blue-500' : 'bg-gray-300'}`}
-              onClick={() => {
-                if (dietCardsRef.current) {
-                  dietCardsRef.current.scrollTo({ left: group * 1100, behavior: 'smooth' });
-                }
+          {/* Render duplicated content for seamless loop */}
+          {images.map((card, index) => (
+            <div
+              key={`duplicate-${index}`}
+              className="flex-shrink-0 transition-all duration-300"
+              style={{
+                width: 'calc(33.333% - 8px)',
+                minWidth: '100px',
+                maxWidth: '160px',
+                borderRadius: '8px'
               }}
-            />
+            >
+              <Card3 card={card} />
+            </div>
           ))}
         </div>
       </section>
@@ -618,7 +658,7 @@ const Home = () => {
           ))}
         </div>
 
-        <div className="flex justify-center mt-4 gap-2">
+        {/* <div className="flex justify-center mt-4 gap-2">
           {Array.from({ length: Math.ceil(itemOfWeekProducts.length / 4) }).map((_, index) => (
             <button
               key={index}
@@ -633,7 +673,7 @@ const Home = () => {
               aria-label={`Go to card group ${index + 1}`}
             />
           ))}
-        </div>
+        </div> */}
       </section>
     </div>
   );

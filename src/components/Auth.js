@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaShippingFast, FaArrowLeft } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
+import API_main from '../utils/config/api';
 
 // Add backend API URL - Fixed to properly use environment variables or fallback
-const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
+const API_URL = API_main;
 
 const Auth = () => {
   const { cart } = useCart();

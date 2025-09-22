@@ -11,7 +11,7 @@ const Footer = () => {
   const emailRef = useRef(null);
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText('contact@glowglaz.com');
+    navigator.clipboard.writeText('customercareproductcenter@gmail.com');
     setShowCopyPopup(true);
     
     // Hide popup after 2 seconds
@@ -23,9 +23,9 @@ const Footer = () => {
   return (
     <footer className="bg-[#343B3E] text-white">
       {/* YouTube Subscription Section */}
-      <div className="container mx-auto py-4 sm:py-6 md:py-8 px-3 sm:px-4">
+      <div className="py-4 sm:py-6 md:py-8 px-3 sm:px-4">
         <section className="bg-white py-6 sm:py-8 md:py-12 px-3 sm:px-4 text-center rounded-xl sm:rounded-2xl shadow-md max-w-3xl mx-auto">
-          <div className="max-w-xl mx-auto">
+          <div className="">
             <div className="flex items-center justify-center mb-3 sm:mb-4">
               <img src="https://www.svgrepo.com/show/13671/youtube.svg" alt="YouTube" className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 mr-2 md:block hidden" />
               <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Subscribe to Our YouTube Channel</h2>
@@ -45,7 +45,7 @@ const Footer = () => {
       </div>
       
       {/* Main Footer Links */}
-      <div className="container mx-auto px-4 sm:px-6 md:px-10 lg:px-20 py-6 sm:py-8 border-t border-gray-700">
+      <div className="px-4 sm:px-6 md:px-10 lg:px-20 py-6 sm:py-8 border-t border-gray-700">
         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {/* About Column */}
           <div>
@@ -95,13 +95,13 @@ const Footer = () => {
                     className="h-4 sm:h-6 object-contain"
                   />
                 </div>
-                <div className="bg-white p-1.5 sm:p-2 rounded-md h-8 sm:h-10 flex items-center justify-center">
+                {/* <div className="bg-white p-1.5 sm:p-2 rounded-md h-8 sm:h-10 flex items-center justify-center">
                   <img 
                     src={two} 
                     alt="Mastercard" 
                     className="h-4 sm:h-6 object-contain"
-                  />
-                </div>
+                  /> */}
+                {/* </div> */}
                 <div className="bg-white p-1.5 sm:p-2 rounded-md h-8 sm:h-10 flex items-center justify-center">
                   <img 
                     src={three} 

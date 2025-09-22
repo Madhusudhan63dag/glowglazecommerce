@@ -1,7 +1,6 @@
 import soap from "../../utils/image/icon/soap_free.png"
 import paraben from '../../utils/image/icon/paraben_Free.png'
 import ayush from '../../utils/image/icon/ayush.png'
-import bharat from '../../utils/image/icon/bharat.svg'
 import cruelty_free from '../../utils/image/icon/cruelty_free.png'
 import gmp from '../../utils/image/icon/gmp.png'
 import iso from '../../utils/image/icon/iso.svg'
@@ -13,412 +12,526 @@ import antiInflammatory from '../../utils/image/icon/antiInflammatory.png'
 import clinicallytested from '../../utils/image/icon/clinicallytested.png'
 import nosyntheticadditives from '../../utils/image/icon/nosyntheticadditives.png'
 import phbalanced from '../../utils/image/icon/phbalanced.png'
+import spa from '../image/product.png'
 
-const trending = [
-  {
-    id: 1,
-    name: "Ayurvedic Medicine",
-    image: "sampoorn-arogya.jpg",
-  },
-  {
-    id: 2,
-    name: "Body Slim",
-    image: "dr-joints.jpg",
-  },
+// ===========================
+// MAIN PRODUCT DATABASE
+// ===========================
+// ===========================
+// UPDATED MAIN PRODUCT DATABASE WITH UNIQUE IMAGES
+// ===========================
+
+const MAIN_PRODUCTS = {
   
-  {
-    id: 3,
-    name: "Skin Care",
-    image: "beyondslim.jpg",
-  }
-]
-
-const newproduct = [
-  {
+  1: {
     id: 1,
-    name: "Sampoorn Arogya",
+    title: "Sampoorn Arogya Herbal Supplement",
+    shortName: "Sampoorn Arogya",
+    category: "ayurvedic-medicine",
+    brand: "Sampoorn Arogya",
+    price: 3990,
     image: "sampoorn-arogya.jpg",
-    price: 3990
-  },
-  {
-    id: 2,
-    name: "Dr. Joints",
-    image: "dr-joints.jpg",
-    price: 3990
-  },
-  
-  {
-    id: 3,
-    name: "Beyondslim",
-    image: "beyondslim.jpg",
-    price: 3990
-  },
-  {
-    id: 4,
-    name: "PSORIGO Body Lotion",
-    image: "psorigo-oil.jpg",
-    price: 1499
-  },
-    {
-    id: 5,
-    name: "PSORIGO Body Wash",
-    image: "psorigo-oil.jpg",
-    price: 1499
-  },
-    {
-    id: 6,
-    name: "PSORIGO Oil",
-    image: "psorigo-oil.jpg",
-    price: 1499
-  },
-]
-
-const brand = [
-  {
-    id: 1,
-    name: "Sampoorn Arogya",
-    image: "sampoorn-arogya.jpg",
-  },
-  {
-    id: 2,
-    name: "Dr. Joints",
-    image: "dr-joints.jpg",
-  },
-  
-  {
-    id: 3,
-    name: "Beyondslim",
-    image: "beyondslim.jpg",
-  },
-  {
-    id: 4,
-    name: "PSORIGO ",
-    image: "psorigo-oil.jpg",
-  }
-]
-
-const productData = [
-  {
-    "id": 1,
-    "title": "Sampoorn Arogya Herbal Supplement",
-    "description": "An Ayurvedic formulation designed to aid in weight management by promoting the reduction of excess fat tissues and preventing their accumulation. Clinically tested and recommended by various practitioners.",
-    "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
-    "features": [
-      { "id": 1, "title": "Ayurvedic Formulation", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 2, "title": "Clinically Tested", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 3, "title": "Weight Management", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" }
+    // FIXED: Unique main product image
+    imageUrl: "https://placehold.co/250x250/2e7d32/ffffff?text=Sampoorn+Arogya",
+    description: "An Ayurvedic formulation designed to aid in weight management by promoting the reduction of excess fat tissues and preventing their accumulation. Clinically tested and recommended by various practitioners.",
+    longDescription: "Revitalize your body from within with Sampoorn Arogya—an all-in-one Ayurvedic supplement crafted to strengthen immunity, improve digestion, and boost daily energy. Backed by ancient wisdom and modern science, it's your go-to for total wellness support.",
+    ingredients: "Ashwagandha, Triphala, Shatavari, Guduchi, Brahmi, Turmeric, Ginger, Pippali, and other traditional Ayurvedic herbs.",
+    allergens: ["No known allergens"],
+    features: [
+      { "url": herbal, "title": "Herbal" },
+      { "url": ayush, "title": "AYUSH" },
+      { "url": clinicallytested, "title": "Clinically Tested" },
+      { "url": no_side_effects, "title": "No Side Effects" },
+      { "url": vegetarian, "title": "Vegetarian" },
+      { "url": "https://cdn.naturamarket.ca/catalog/category/organic_3.png", "title": "Organic" }
     ],
-    "price": 3990
-  },
-  {
-    "id": 2,
-    "title": "Beyond Slim Ayurvedic Slimming Oil",
-    "description": "An Ayurvedic slimming oil crafted with natural herbs to reduce stubborn fat, improve skin elasticity, and support holistic wellness. Made under expert supervision using pure plant extracts, it's 100% vegan, cruelty-free, and free from harmful additives—bringing you safe, effective results rooted in traditional healing.",
-    "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
-    "features": [
-      { "id": 1, "title": "Supports Joint Health", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 2, "title": "Reduces Inflammation", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 3, "title": "Improves Flexibility", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" }
-    ],
-    "price": 3990
-  },
-  {
-    "id": 3,
-    "title": "Beyond Slim ",
-    "description": "A refreshing drink mix formulated to reboot your metabolism, curb cravings, and support healthy weight loss. Made with natural ingredients like green tea extract and ashwagandha, ZipSlim® is designed to help you feel energized, burn fat, and stay on track—available in delicious flavors and both caffeinated and caffeine-free options.",
-    "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
-    "features": [
-      { "id": 1, "title": "Boosts Metabolism", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 2, "title": "Supports Weight Loss", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 3, "title": "Increases Energy", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" }
-    ],
-    "price": 3990
-  },
-  {
-    "id": 4,
-    "title": "PSORIGO Body Lotion",
-    "description": "A specialized body lotion formulated to moisturize and soothe psoriasis-prone skin, reducing scaling and irritation.",
-    "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
-    "features": [
-      { "id": 1, "title": "Deep Moisturization", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 2, "title": "Soothes Skin", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 3, "title": "Reduces Scaling", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" }
-    ],
-    "price": 1499
-  },
-  {
-    "id": 5,
-    "title": "PSORIGO Body Wash",
-    "description": "A gentle body wash designed for individuals with psoriasis, helping to cleanse and soothe the skin.",
-    "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
-    "features": [
-      { "id": 1, "title": "Gentle Cleansing", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 2, "title": "Soothes Irritation", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 3, "title": "Psoriasis Friendly", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" }
-    ],
-    "price": 1499
-  },
-  {
-    "id": 6,
-    "title": "PSORIGO Oil",
-    "description": "An herbal oil formulated to provide relief from psoriasis symptoms, moisturizing and soothing the skin.",
-    "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
-    "features": [
-      { "id": 1, "title": "Herbal Formulation", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 2, "title": "Moisturizes Skin", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" },
-      { "id": 3, "title": "Soothes Irritation", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image" }
-    ],
-    "price": 1499
-  }
-]
-
-const trendingpage = [
-  {"id": 1,
-    "title": "Ayurvedic Medicine",
-    "description": "Support a balanced lifestyle with our Ayurvedic formula—designed to help reduce excess fat and block new buildup. Clinically tested and trusted by experts, it brings ancient wisdom to your modern health goals.",
-    "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
-    "benefits": {
-      "title": "What Makes Our Ayurvedic Formula Stand Out",
-      "points": [
-        {
-          "title": "100% Natural Power",
-          "description": "Packed with time-tested Ayurvedic herbs, our formula delivers real results—without any harmful chemicals or synthetic fillers. Just pure, plant-based wellness."
-        },
-        {
-          "title": "Backed by Science",
-          "description": "Clinically tested and trusted by health professionals, our product is proven to work safely and effectively. Real results, verified by experts."
-        },
-        {
-          "title": "Total Body Support",
-          "description": "Go beyond fat loss—boost your metabolism, improve digestion, and feel more energized every day. It’s full-body wellness in one powerful blend."
-        },
-        {
-          "title": "Stops Fat Before It Starts",
-          "description": "Our formula doesn’t just burn fat—it helps block new fat from forming by targeting the root causes. Stay in control, stay confident."
-        }
-      ]
-    },
-    "products": [
-      { "id": 1, "title": "Sampoorn Arogya", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 3990 },
-      { "id": 2, "title": "Dr. Joints", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 3990 },
-      { "id": 3, "title": "PSORIGO Oil", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 1499 },
-      { "id": 4, "title": "PSORIGO Body Lotion", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 1499 },
-      { "id": 5, "title": "PSORIGO Body Wash", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 1499 }
-    ],
-    "banner": [
-          {
-      "id": 1,
-      "imageUrl": "https://placehold.co/1080x600/222222/FFFFFF/png?text=Trending+Products",
-      "heading": "Discover What's Hot",
-      "subheading": "Explore our most popular health and wellness products"
-    },
-    {
-      "id": 2,
-      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
-      "heading": "Customer Favorites",
-      "subheading": "The products our customers love the most"
-    },
-    {
-      "id": 2,
-      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
-      "heading": "Customer Favorites",
-      "subheading": "The products our customers love the most"
-    }
-    ]
-  },
-  {"id": 2,
-    "title": "Body Slim",
-    "description": "Take control of your weight naturally with Body Slim—our powerful Ayurvedic formula crafted to help reduce stubborn fat and block future buildup. Clinically tested and trusted by health experts, it’s your go-to solution for effective, long-term weight management.",
-    "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
-    "products": [
-      { "id": 1, "title": "Beyondslim", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 3990 },
-    ],
-    "banner": [
-          {
-      "id": 1,
-      "imageUrl": "https://placehold.co/1080x600/222222/FFFFFF/png?text=Trending+Products",
-      "heading": "Discover What's Hot",
-      "subheading": "Explore our most popular health and wellness products"
-    },
-    {
-      "id": 2,
-      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
-      "heading": "Customer Favorites",
-      "subheading": "The products our customers love the most"
-    },
-    {
-      "id": 2,
-      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
-      "heading": "Customer Favorites",
-      "subheading": "The products our customers love the most"
-    }
-    ]
-  },
-  {"id": 3,
-    "title": "Skin Care",
-    "description": "Reveal your natural glow with our Ayurvedic Skin Care formula—crafted with herbal ingredients that nourish, protect, and rejuvenate from within. Clinically tested and recommended by practitioners, it supports clear, radiant, and healthy skin the natural way.",
-    "imageUrl": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
-    "products": [
-      { "id": 3, "title": "PSORIGO Oil", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 1499 },
-      { "id": 4, "title": "PSORIGO Body Lotion", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 1499 },
-      { "id": 5, "title": "PSORIGO Body Wash", "url": "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image", "price": 1499 }
-    ],
-    "banner": [
-          {
-      "id": 1,
-      "imageUrl": "https://placehold.co/1080x600/222222/FFFFFF/png?text=Trending+Products",
-      "heading": "Discover What's Hot",
-      "subheading": "Explore our most popular health and wellness products"
-    },
-    {
-      "id": 2,
-      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
-      "heading": "Customer Favorites",
-      "subheading": "The products our customers love the most"
-    },
-    {
-      "id": 2,
-      "imageUrl": "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
-      "heading": "Customer Favorites",
-      "subheading": "The products our customers love the most"
-    }
-    ]
-  },
-]
-
-const productDetailData = [
-  {
-    "id": 1,
-    "title": "Sampoorn Arogya Herbal Supplement",
-    "price": "₹3,990",
-    "images": [
-      "https://placehold.co/500x500/e3f2fd/1e88e5?text=Sampoorn+Arogya+1",
-      "https://placehold.co/500x500/e3f2fd/1e88e5?text=Sampoorn+Arogya+2",
-      "https://placehold.co/500x500/e3f2fd/1e88e5?text=Sampoorn+Arogya+3",
-      "https://placehold.co/500x500/e3f2fd/1e88e5?text=Sampoorn+Arogya+4"
-    ],
-    "badge": "New",
-    "whyLoveIt": "Revitalize your body from within with Sampoorn Arogya—an all-in-one Ayurvedic supplement crafted to strengthen immunity, improve digestion, and boost daily energy. Backed by ancient wisdom and modern science, it's your go-to for total wellness support.",
-    "ingredients": "Ashwagandha, Triphala, Shatavari, Guduchi, Brahmi, Turmeric, Ginger, Pippali, and other traditional Ayurvedic herbs.",
-    "allergens": ["No known allergens"],
-    "values": [
+    values: [
       { "code": "AY", "name": "Ayurvedic", "img": ayush },
       { "code": "HB", "name": "Herbal", "img": herbal },
       { "code": "VG", "name": "Vegetarian", "img": vegetarian }
     ],
-    "inStock": true
-  },
-  {
-    "id": 2,
-    "title": "Dr. Joints Advanced Joint Health Formula",
-    "price": "₹3,990",
-    "images": [
-      "https://placehold.co/500x500/e8f5e9/43a047?text=Dr+Joints+1",
-      "https://placehold.co/500x500/e8f5e9/43a047?text=Dr+Joints+2",
-      "https://placehold.co/500x500/e8f5e9/43a047?text=Dr+Joints+3",
-      "https://placehold.co/500x500/e8f5e9/43a047?text=Dr+Joints+4"
+    // FIXED: Unique images for each angle/view
+    images: [
+      "https://placehold.co/500x500/4caf50/ffffff?text=Sampoorn+Arogya+Front",
+      "https://placehold.co/500x500/388e3c/ffffff?text=Sampoorn+Arogya+Back", 
+      "https://placehold.co/500x500/2e7d32/ffffff?text=Sampoorn+Arogya+Side",
+      "https://placehold.co/500x500/1b5e20/ffffff?text=Sampoorn+Arogya+Label"
     ],
-    "badge": "Bestseller",
-    "whyLoveIt": "Say goodbye to joint discomfort with Dr. Joints—your daily dose of comfort and flexibility. Powered by FruiteX-B and key joint-support nutrients, this formula helps reduce stiffness, ease movement, and keep you active without limits.",
-    "ingredients": "FruiteX-B (calcium fructoborate), Glucosamine Sulfate, Chondroitin Sulfate, MSM (Methylsulfonylmethane), Boswellia Extract, Turmeric Extract, Ginger Extract.",
-    "allergens": ["Shellfish (from Glucosamine)"],
-    "values": [
+    badge: "New",
+    inStock: true,
+    tags: ["trending", "newProducts", "ayurvedic", "brandInfo", "itemOfWeekProducts"],
+    trending: [
+      { "id": 1, "name": "SampoornArogya", "image": spa, "link": "/trending?category=ayurvedic-medicine" },
+    ],
+    newProducts: [
+      { "id": 1, "name": "Sampoorn Arogya", "image": "https://placehold.co/250x250/2e7d32/ffffff?text=Sampoorn+Arogya", "price": 3990 },
+    ],
+    brandInfo: { "id": 1, "name": "Sampoorn Arogya", "image": spa },
+      itemOfWeekProducts: { "id": 1,"price": 3990, "title": "Sampoorn Arogya", "image": spa, "features": [
+        { "url": herbal, "title": "Herbal" },
+        { "url": ayush, "title": "AYUSH" },
+        { "url": clinicallytested, "title": "Clinically Tested" },
+        { "url": no_side_effects, "title": "No Side Effects" },
+      ],
+      description: "An Ayurvedic formulation designed to aid in weight management by promoting the reduction of excess fat tissues and preventing their accumulation. Clinically tested and recommended by various practitioners.",      
+    },
+  },
+
+  2: {
+    id: 2,
+    title: "Dr. Joints Advanced Joint Health Formula",
+    shortName: "Dr. Joints",
+    category: "ayurvedic-medicine",
+    brand: "Dr. Joints",
+    price: 3990,
+    image: "dr-joints.jpg",
+    imageUrl: "https://placehold.co/250x250/43a047/ffffff?text=Dr+Joints",
+    description: "Say goodbye to joint discomfort with Dr. Joints—your daily dose of comfort and flexibility. Powered by FruiteX-B and key joint-support nutrients, this formula helps reduce stiffness, ease movement, and keep you active without limits.",
+    longDescription: "Say goodbye to joint discomfort with Dr. Joints—your daily dose of comfort and flexibility. Powered by FruiteX-B and key joint-support nutrients, this formula helps reduce stiffness, ease movement, and keep you active without limits.",
+    ingredients: "FruiteX-B (calcium fructoborate), Glucosamine Sulfate, Chondroitin Sulfate, MSM (Methylsulfonylmethane), Boswellia Extract, Turmeric Extract, Ginger Extract.",
+    allergens: ["Shellfish (from Glucosamine)"],
+    features: [
+      { "url": joint_pain, "title": "Joint Health" },
+      { "url": antiInflammatory, "title": "Anti-Inflammatory" },
+      { "url": clinicallytested, "title": "Clinically Tested" },
+      { "url": no_side_effects, "title": "No Side Effects" }
+    ],
+    values: [
       { "code": "JH", "name": "Joint Health", "img": joint_pain },
       { "code": "AI", "name": "Anti-Inflammatory", "img": antiInflammatory },
       { "code": "CT", "name": "Clinically Tested", "img": clinicallytested }
     ],
-    "inStock": true
-  },
-  {
-    "id": 3,
-    "title": "Beyond Slim Ayurvedic Slimming Oil",
-    "price": "₹3,990",
-    "images": [
-      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyond+Slim+Oil+1",
-      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyond+Slim+Oil+2",
-      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyond+Slim+Oil+3",
-      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyond+Slim+Oil+4"
+    images: [
+      "https://placehold.co/500x500/e8f5e9/43a047?text=Dr+Joints+Bottle",
+      "https://placehold.co/500x500/c8e6c9/2e7d32?text=Dr+Joints+Label",
+      "https://placehold.co/500x500/a5d6a7/1b5e20?text=Dr+Joints+Benefits",
+      "https://placehold.co/500x500/81c784/0d5016?text=Dr+Joints+Usage"
     ],
-    "badge": "Popular",
-    "whyLoveIt": "Target stubborn fat, tone your body, and nourish your skin with Beyond Slim Ayurvedic Slimming Oil—made with potent herbal extracts and time-tested Ayurvedic ingredients. It's your natural solution to inch loss and improved skin elasticity.",
-    "ingredients": "Sesame Oil, Castor Oil, Garlic Extract, Cinnamon Oil, Eucalyptus Oil, Ginger Extract, Lemon Oil, Camphor, Ajwain Oil, Clove Oil, Ayurvedic Herbs.",
-    "values": [
+    badge: "Bestseller",
+    inStock: true,
+    tags: ["newProducts", "ayurvedic", "brandInfo", "itemOfWeekProducts"],
+    trending: [
+      { "id": 2, "title": "Dr. Joints", "image": "https://placehold.co/250x250/43a047/ffffff?text=Dr+Joints", "link": "/trending?category=ayurvedic-medicine" },
+    ],
+    newProducts: [
+      { "id": 2, "name": "Dr. Joints", "image": spa, "price": 3990 },
+    ],
+    brandInfo: { "id": 2, "name": "Dr. Joints", "image": "https://placehold.co/250x250/43a047/ffffff?text=Dr+Joints" },
+    itemOfWeekProducts: { "id": 1,"price": 3990, "title": "Dr. Joints", "image": spa, "features": [
+        { "url": herbal, "title": "Herbal" },
+        { "url": ayush, "title": "AYUSH" },
+        { "url": clinicallytested, "title": "Clinically Tested" },
+        { "url": no_side_effects, "title": "No Side Effects" },
+      ],
+      description: "Say goodbye to joint discomfort with Dr. Joints—your daily dose of comfort and flexibility. Powered by FruiteX-B and key joint-support nutrients, this formula helps reduce stiffness, ease movement, and keep you active without limits.",      
+    },
+  },
+
+  3: {
+    id: 3,
+    title: "Beyond Slim Ayurvedic Slimming Oil",
+    shortName: "Beyondslim",
+    category: "body-slim",
+    brand: "Beyondslim",
+    price: 3990,
+    image: "beyondslim.jpg",
+    imageUrl: "https://placehold.co/250x250/ff9800/ffffff?text=Beyond+Slim",
+    description: "A refreshing drink mix formulated to reboot your metabolism, curb cravings, and support healthy weight loss. Made with natural ingredients like green tea extract and ashwagandha, ZipSlim® is designed to help you feel energized, burn fat, and stay on track—available in delicious flavors and both caffeinated and caffeine-free options.",
+    longDescription: "Target stubborn fat, tone your body, and nourish your skin with Beyond Slim Ayurvedic Slimming Oil—made with potent herbal extracts and time-tested Ayurvedic ingredients. It's your natural solution to inch loss and improved skin elasticity.",
+    ingredients: "Sesame Oil, Castor Oil, Garlic Extract, Cinnamon Oil, Eucalyptus Oil, Ginger Extract, Lemon Oil, Camphor, Ajwain Oil, Clove Oil, Ayurvedic Herbs.",
+    allergens: ["No known allergens"],
+    features: [
+      { "url": "https://cdn.naturamarket.ca/catalog/category/plant_based_5.png", "title": "Plant Based" },
+      { "url": "https://cdn.naturamarket.ca/catalog/category/Vegan_8.png", "title": "Vegan" },
+      { "url": "https://cdn.naturamarket.ca/catalog/category/non_gmo_5.png", "title": "Non-GMO" },
+      { "url": herbal, "title": "Herbal" },
+      { "url": no_side_effects, "title": "No Side Effects" }
+    ],
+    values: [
       { "code": "AI", "name": "Ayurvedic Ingredients", "img": ayush },
       { "code": "VF", "name": "Vegan & Cruelty-Free", "img": cruelty_free },
       { "code": "NS", "name": "No Synthetic Additives", "img": nosyntheticadditives }
     ],
-    "inStock": true
+    images: [
+      "https://placehold.co/500x500/fff3e0/ff9800?text=Beyond+Slim+Bottle",
+      "https://placehold.co/500x500/ffe0b2/f57c00?text=Beyond+Slim+Ingredients",
+      "https://placehold.co/500x500/ffcc02/e65100?text=Beyond+Slim+Results",  
+      "https://placehold.co/500x500/ffa726/bf360c?text=Beyond+Slim+Guide"
+    ],
+    badge: "Popular",
+    inStock: true,
+    tags: ["trending", "newProducts", "body-slim", "brandInfo"],
+    trending: [
+      { "id": 3, "name": "Beyondslim", "image": "https://placehold.co/250x250/ff9800/ffffff?text=Beyond+Slim", "link":"/trending?category=body-slim" },
+    ],
+    newProducts: [
+      { "id": 3, "name": "Beyondslim", "image": "https://placehold.co/250x250/ff9800/ffffff?text=Beyond+Slim", "price": 3990 },
+    ],
+    brandInfo: { "id": 3, "name": "Beyondslim", "image": "https://placehold.co/250x250/ff9800/ffffff?text=Beyond+Slim" },
   },
-  {
-    "id": 4,
-    "title": "PSORIGO Body Lotion",
-    "price": "₹1,499",
-    "images": [
-      "https://placehold.co/500x500/e1f5fe/03a9f4?text=PSORIGO+Lotion+1",
-      "https://placehold.co/500x500/e1f5fe/03a9f4?text=PSORIGO+Lotion+2",
-      "https://placehold.co/500x500/e1f5fe/03a9f4?text=PSORIGO+Lotion+3",
-      "https://placehold.co/500x500/e1f5fe/03a9f4?text=PSORIGO+Lotion+4"
-    ],
-    "badge": "Dermatologist Approved",
-    "whyLoveIt": "Soothe, hydrate, and heal with PSORIGO Body Lotion—formulated for psoriasis-prone skin. This gentle yet powerful blend helps reduce flaking, calm irritation, and restore your skin’s natural softness and strength.",
-    "ingredients": "Purified Water, Aloe Vera Extract, Shea Butter, Coconut Oil, Neem Extract, Turmeric Extract, Tea Tree Oil, Calendula Extract, Vitamin E, Glycerin, Natural Preservatives.",
-    "allergens": ["May contain tree nut derivatives (coconut, shea)"],
-    "values": [
-      { "code": "SF", "name": "Soap-Free", "img": soap },
-      { "code": "PF", "name": "Paraben-Free", "img": paraben },
-      { "code": "pH", "name": "pH Balanced", "img": phbalanced }
-    ],
-    "inStock": true
-  },
-  {
-    "id": 5,
-    "title": "PSORIGO Body Wash",
-    "price": "₹1,499",
-    "images": [
-      "https://placehold.co/500x500/e1f5fe/0288d1?text=PSORIGO+Wash+1",
-      "https://placehold.co/500x500/e1f5fe/0288d1?text=PSORIGO+Wash+2",
-      "https://placehold.co/500x500/e1f5fe/0288d1?text=PSORIGO+Wash+3",
-      "https://placehold.co/500x500/e1f5fe/0288d1?text=PSORIGO+Wash+4"
-    ],
-    "badge": "Gentle Formula",
-    "whyLoveIt": "Cleanse with care using PSORIGO Body Wash—a soap-free formula designed for sensitive, psoriasis-prone skin. It gently lifts away impurities while locking in moisture, leaving your skin calm, clean, and comforted.",
-    "ingredients": "Purified Water, Glycerin, Aloe Vera Juice, Decyl Glucoside (Plant-Based Cleanser), Dead Sea Minerals, Colloidal Oatmeal, Chamomile Extract, Lavender Oil, Vitamin B5, Natural Preservatives.",
-    "allergens": ["May contain oat derivatives"],
-    "values": [
-      { "code": "SF", "name": "Soap-Free", "img": soap },
-      { "code": "PF", "name": "Paraben-Free", "img": paraben },
-      { "code": "pH", "name": "pH Balanced", "img": phbalanced }
-    ],
-    "inStock": true
-  },
-  {
-    "id": 6,
-    "title": "PSORIGO Oil",
-    "price": "₹1,499",
-    "images": [
-      "https://placehold.co/500x500/e0f2f1/00897b?text=PSORIGO+Oil+1",
-      "https://placehold.co/500x500/e0f2f1/00897b?text=PSORIGO+Oil+2",
-      "https://placehold.co/500x500/e0f2f1/00897b?text=PSORIGO+Oil+3",
-      "https://placehold.co/500x500/e0f2f1/00897b?text=PSORIGO+Oil+4"
-    ],
-    "badge": "100% Natural",
-    "whyLoveIt": "Target psoriasis symptoms at the root with PSORIGO Oil—a rich, herbal treatment that hydrates deeply, soothes itchiness, and reduces inflammation. Fast-absorbing and non-greasy, it leaves your skin feeling calm and cared for.",
-    "ingredients": "Coconut Oil, Neem Oil, Tea Tree Oil, Black Seed Oil, Turmeric Extract, Aloe Vera Extract, Vitamin E, Evening Primrose Oil, Calendula Oil, Jojoba Oil.",
-    "allergens": ["May contain tree nut derivatives (coconut, jojoba)"],
-    "values": [
-      { "code": "SF", "name": "Soap-Free", "img": soap },
-      { "code": "PF", "name": "Paraben-Free", "img": paraben },
-      { "code": "pH", "name": "pH Balanced", "img": phbalanced }
-    ],
-    "inStock": true
-  }
-]
 
-// Deal data moved from DealsPage.js
+  4: {
+    id: 4,
+    title: "PSORIGO Body Lotion",
+    shortName: "PSORIGO Body Lotion", 
+    category: "skin-care",
+    brand: "PSORIGO",
+    price: 1499,
+    image: "psorigo-lotion.jpg",
+    imageUrl: "https://placehold.co/250x250/03a9f4/ffffff?text=PSORIGO+Lotion",
+    description: "A specialized body lotion formulated to moisturize and soothe psoriasis-prone skin, reducing scaling and irritation.",
+    longDescription: "Soothe, hydrate, and heal with PSORIGO Body Lotion—formulated for psoriasis-prone skin. This gentle yet powerful blend helps reduce flaking, calm irritation, and restore your skin's natural softness and strength.",
+    ingredients: "Purified Water, Aloe Vera Extract, Shea Butter, Coconut Oil, Neem Extract, Turmeric Extract, Tea Tree Oil, Calendula Extract, Vitamin E, Glycerin, Natural Preservatives.",
+    allergens: ["May contain tree nut derivatives (coconut, shea)"],
+    features: [
+      { "url": soap, "title": "Soap Free" },
+      { "url": paraben, "title": "Paraben Free" },
+      { "url": herbal, "title": "Herbal" },
+      { "url": no_side_effects, "title": "No Side Effects" },
+      { "url": "https://cdn.naturamarket.ca/catalog/category/organic_3.png", "title": "Organic" }
+    ],
+    values: [
+      { "code": "SF", "name": "Soap-Free", "img": soap },
+      { "code": "PF", "name": "Paraben-Free", "img": paraben },
+      { "code": "pH", "name": "pH Balanced", "img": phbalanced }
+    ],
+    images: [
+      "https://placehold.co/500x500/e1f5fe/03a9f4?text=PSORIGO+Lotion+Pump",
+      "https://placehold.co/500x500/b3e5fc/0288d1?text=PSORIGO+Lotion+Tube", 
+      "https://placehold.co/500x500/81d4fa/0277bd?text=PSORIGO+Lotion+Texture",
+      "https://placehold.co/500x500/4fc3f7/01579b?text=PSORIGO+Lotion+Benefits"
+    ],
+    badge: "Dermatologist Approved",
+    inStock: true,
+    tags: ["trending", "newProducts", "skin-care", "brandInfo"],
+    trending: [
+      { "id": 4, "name": "PSORIGO Body Lotion", "image": "https://placehold.co/250x250/03a9f4/ffffff?text=PSORIGO+Lotion", "link": "/trending?category=skin-care" },
+    ],
+    newProducts: [
+      { "id": 4, "name": "PSORIGO Body Lotion", "image": "https://placehold.co/250x250/03a9f4/ffffff?text=PSORIGO+Lotion", "price": 1499 },
+    ],
+    brandInfo: { "id": 4, "name": "PSORIGO", "image": "https://placehold.co/250x250/03a9f4/ffffff?text=PSORIGO" },
+  },
+
+  5: {
+    id: 5,
+    title: "PSORIGO Body Wash",
+    shortName: "PSORIGO Body Wash",
+    category: "skin-care", 
+    brand: "PSORIGO",
+    price: 1499,
+    image: "psorigo-wash.jpg",
+    imageUrl: "https://placehold.co/250x250/0288d1/ffffff?text=PSORIGO+Wash",
+    description: "A gentle body wash designed for individuals with psoriasis, helping to cleanse and soothe the skin.",
+    longDescription: "Cleanse with care using PSORIGO Body Wash—a soap-free formula designed for sensitive, psoriasis-prone skin. It gently lifts away impurities while locking in moisture, leaving your skin calm, clean, and comforted.",
+    ingredients: "Purified Water, Glycerin, Aloe Vera Juice, Decyl Glucoside (Plant-Based Cleanser), Dead Sea Minerals, Colloidal Oatmeal, Chamomile Extract, Lavender Oil, Vitamin B5, Natural Preservatives.",
+    allergens: ["May contain oat derivatives"],
+    features: [
+      { "url": soap, "title": "Soap Free" },
+      { "url": paraben, "title": "Paraben Free" },
+      { "url": no_side_effects, "title": "No Side Effects" },
+      { "url": herbal, "title": "Herbal" },
+      { "url": "https://cdn.naturamarket.ca/catalog/category/organic_3.png", "title": "Organic" }
+    ],
+    values: [
+      { "code": "SF", "name": "Soap-Free", "img": soap },
+      { "code": "PF", "name": "Paraben-Free", "img": paraben },
+      { "code": "pH", "name": "pH Balanced", "img": phbalanced }
+    ],
+    images: [
+      "https://placehold.co/500x500/e1f5fe/0288d1?text=PSORIGO+Wash+Bottle",
+      "https://placehold.co/500x500/b3e5fc/0277bd?text=PSORIGO+Wash+Pump",
+      "https://placehold.co/500x500/81d4fa/01579b?text=PSORIGO+Wash+Foam", 
+      "https://placehold.co/500x500/4fc3f7/0d47a1?text=PSORIGO+Wash+Gentle"
+    ],
+    badge: "Gentle Formula",
+    inStock: true,
+    tags: ["newProducts", "skin-care"],
+    trending: [
+      { "id": 5, "title": "PSORIGO Body Wash", "image": "https://placehold.co/250x250/0288d1/ffffff?text=PSORIGO+Wash" },
+    ],
+    newProducts: [
+      { "id": 5, "name": "PSORIGO Body Wash", "image": "https://placehold.co/250x250/0288d1/ffffff?text=PSORIGO+Wash", "price": 1499 },
+    ],
+    brandInfo: { "id": 5, "name": "PSORIGO", "image": "https://placehold.co/250x250/0288d1/ffffff?text=PSORIGO" },
+  },
+
+  6: {
+    id: 6,
+    title: "PSORIGO Oil",
+    shortName: "PSORIGO Oil",
+    category: "skin-care",
+    brand: "PSORIGO", 
+    price: 1499,
+    image: "psorigo-oil.jpg",
+    imageUrl: "https://placehold.co/250x250/00897b/ffffff?text=PSORIGO+Oil", 
+    description: "An herbal oil formulated to provide relief from psoriasis symptoms, moisturizing and soothe the skin.",
+    longDescription: "Target psoriasis symptoms at the root with PSORIGO Oil—a rich, herbal treatment that hydrates deeply, soothes itchiness, and reduces inflammation. Fast-absorbing and non-greasy, it leaves your skin feeling calm and cared for.",
+    ingredients: "Coconut Oil, Neem Oil, Tea Tree Oil, Black Seed Oil, Turmeric Extract, Aloe Vera Extract, Vitamin E, Evening Primrose Oil, Calendula Oil, Jojoba Oil.",
+    allergens: ["May contain tree nut derivatives (coconut, jojoba)"],
+    features: [
+      { "url": herbal, "title": "Herbal" },
+      { "url": no_side_effects, "title": "No Side Effects" },
+      { "url": antiInflammatory, "title": "Anti-Inflammatory" },
+      { "url": "https://cdn.naturamarket.ca/catalog/category/organic_3.png", "title": "Organic" },
+      { "url": gmp, "title": "GMP" }
+    ],
+    values: [
+      { "code": "SF", "name": "Soap-Free", "img": soap },
+      { "code": "PF", "name": "Paraben-Free", "img": paraben },
+      { "code": "pH", "name": "pH Balanced", "img": phbalanced }
+    ],
+    images: [
+      "https://placehold.co/500x500/e0f2f1/00897b?text=PSORIGO+Oil+Bottle",
+      "https://placehold.co/500x500/b2dfdb/00695c?text=PSORIGO+Oil+Dropper",
+      "https://placehold.co/500x500/80cbc4/004d40?text=PSORIGO+Oil+Texture",
+      "https://placehold.co/500x500/4db6ac/00251a?text=PSORIGO+Oil+Natural"
+    ],
+    badge: "100% Natural",
+    inStock: true,
+    tags: ["newProducts", "skin-care"],
+    trending: [
+      { "id": 6, "title": "PSORIGO Oil", "image": "https://placehold.co/250x250/00897b/ffffff?text=PSORIGO+Oil" },
+    ],
+    newProducts: [
+      { "id": 6, "name": "PSORIGO Oil", "image": "https://placehold.co/250x250/00897b/ffffff?text=PSORIGO+Oil", "price": 1499 },
+    ],
+    brandInfo: { "id": 6, "name": "PSORIGO", "image": "https://placehold.co/250x250/00897b/ffffff?text=PSORIGO" },
+  }
+
+};
+
+
+
+// Get product by ID
+const getProductById = (id) => {
+  return MAIN_PRODUCTS[id] || null;
+};
+
+// Get multiple products by IDs
+const getProductsByIds = (ids) => {
+  return ids.map(id => MAIN_PRODUCTS[id]).filter(product => product);
+};
+
+// Get products by category
+const getProductsByCategory = (category) => {
+  return Object.values(MAIN_PRODUCTS).filter(product => product.category === category);
+};
+
+// Get products by tag
+const getProductsByTag = (tag) => {
+  return Object.values(MAIN_PRODUCTS).filter(product => product.tags.includes(tag));
+};
+
+// Get products by brand
+const getProductsByBrand = (brand) => {
+  return Object.values(MAIN_PRODUCTS).filter(product => product.brand === brand);
+};
+
+// Get all products
+const getAllProducts = () => {
+  return Object.values(MAIN_PRODUCTS);
+};
+
+// Add new product (for easy expansion)
+const addProduct = (productData) => {
+  const newId = Math.max(...Object.keys(MAIN_PRODUCTS).map(Number)) + 1;
+  const newProduct = {
+    id: newId,
+    tags: [],
+    inStock: true,
+    ...productData
+  };
+  MAIN_PRODUCTS[newId] = newProduct;
+  return newProduct;
+};
+
+// Update existing product
+const updateProduct = (id, updates) => {
+  if (MAIN_PRODUCTS[id]) {
+    MAIN_PRODUCTS[id] = { ...MAIN_PRODUCTS[id], ...updates };
+    return MAIN_PRODUCTS[id];
+  }
+  return null;
+};
+
+// ============================
+// REFACTORED DATA ARRAYS
+// ============================ 
+
+// Get trending products (fetches trending array from each product in main database)
+const getTrending = () => {
+  return Object.values(MAIN_PRODUCTS)
+    .filter(product => product.tags.includes('trending'))
+    .flatMap(product => product.trending);
+};
+
+// Get new products (fetches exactly what's in the newProducts arrays)
+const getNewProducts = () => {
+  return Object.values(MAIN_PRODUCTS)
+    .filter(product => product.tags.includes('newProducts'))
+    .flatMap(product => product.newProducts);
+};
+
+// Get brands (fetches unique brands from main database)
+const getBrands = () => {
+    return Object.values(MAIN_PRODUCTS)
+      .filter(product => product.tags.includes('brandInfo'))
+      .flatMap(product => product.brandInfo);
+};
+
+const getItemOfWeekProducts = () => {
+  return Object.values(MAIN_PRODUCTS)
+    .filter(product => product.tags.includes('itemOfWeekProducts'))
+    .flatMap(product => product.itemOfWeekProducts);
+};
+
+// Get product data for listing (fetches from main database)
+const getProductData = () => {
+  return getAllProducts().map(product => ({
+    id: product.id,
+    title: product.title,
+    description: product.description,
+    imageUrl: product.imageUrl,
+    features: product.features,
+    price: product.price
+  }));
+};
+
+// Get product detail data (fetches from main database)
+const getProductDetailData = () => {
+  return getAllProducts().map(product => ({
+    id: product.id,
+    title: product.title,
+    price: `₹${product.price.toLocaleString()}`,
+    images: product.images,
+    badge: product.badge,
+    whyLoveIt: product.longDescription,
+    ingredients: product.ingredients,
+    allergens: product.allergens,
+    values: product.values,
+    inStock: product.inStock
+  }));
+};
+
+// ===========================
+// TRENDING PAGE DATA
+// ===========================
+const getTrendingPageData = () => {
+  return [
+    {
+      id: 1,
+      title: "Ayurvedic Medicine",
+      description: "Support a balanced lifestyle with our Ayurvedic formula—designed to help reduce excess fat and block new buildup. Clinically tested and trusted by experts, it brings ancient wisdom to your modern health goals.",
+      imageUrl: "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
+      benefits: {
+        title: "What Makes Our Ayurvedic Formula Stand Out",
+        points: [
+          {
+            title: "100% Natural Power",
+            description: "Packed with time-tested Ayurvedic herbs, our formula delivers real results—without any harmful chemicals or synthetic fillers. Just pure, plant-based wellness.",
+            imageUrl: "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+          },
+          {
+            title: "Backed by Science",
+            description: "Clinically tested and trusted by health professionals, our product is proven to work safely and effectively. Real results, verified by experts.",
+            imageUrl: "https://images.unsplash.com/photo-1584362917165-526a968579e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+          },
+          {
+            title: "Total Body Support",
+            description: "Go beyond fat loss—boost your metabolism, improve digestion, and feel more energized every day. It's full-body wellness in one powerful blend.",
+            imageUrl: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+          },
+          {
+            title: "Stops Fat Before It Starts",
+            description: "Our formula doesn't just burn fat—it helps block new fat from forming by targeting the root causes. Stay in control, stay confident.",
+            imageUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+          }
+        ]
+      },
+      products: getProductsByCategory('ayurvedic-medicine').map(product => ({
+        id: product.id,
+        title: product.shortName,
+        url: product.imageUrl,
+        price: product.price
+      })),
+      banner: [
+        {
+          id: 1,
+          imageUrl: "https://placehold.co/1080x600/222222/FFFFFF/png?text=Trending+Products",
+          heading: "Discover What's Hot",
+          subheading: "Explore our most popular health and wellness products"
+        },
+        {
+          id: 2,
+          imageUrl: "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
+          heading: "Customer Favorites",
+          subheading: "The products our customers love the most"
+        }
+      ]
+    },
+    {
+      id: 2,
+      title: "Body Slim",
+      description: "Take control of your weight naturally with Body Slim—our powerful Ayurvedic formula crafted to help reduce stubborn fat and block future buildup. Clinically tested and trusted by health experts, it's your go-to solution for effective, long-term weight management.",
+      imageUrl: "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
+      products: getProductsByCategory('body-slim').map(product => ({
+        id: product.id,
+        title: product.shortName,
+        url: product.imageUrl,
+        price: product.price
+      })),
+      banner: [
+        {
+          id: 1,
+          imageUrl: "https://placehold.co/1080x600/222222/FFFFFF/png?text=Trending+Products",
+          heading: "Discover What's Hot",
+          subheading: "Explore our most popular health and wellness products"
+        },
+        {
+          id: 2,
+          imageUrl: "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
+          heading: "Customer Favorites",
+          subheading: "The products our customers love the most"
+        }
+      ]
+    },
+    {
+      id: 3,
+      title: "Skin Care",
+      description: "Reveal your natural glow with our Ayurvedic Skin Care formula—crafted with herbal ingredients that nourish, protect, and rejuvenate from within. Clinically tested and recommended by practitioners, it supports clear, radiant, and healthy skin the natural way.",
+      imageUrl: "https://placehold.co/250x250/000000/FFFFFF/png?text=Product+Image",
+      products: getProductsByCategory('skin-care').map(product => ({
+        id: product.id,
+        title: product.shortName,
+        url: product.imageUrl,
+        price: product.price
+      })),
+      banner: [
+        {
+          id: 1,
+          imageUrl: "https://placehold.co/1080x600/222222/FFFFFF/png?text=Trending+Products",
+          heading: "Discover What's Hot",
+          subheading: "Explore our most popular health and wellness products"
+        },
+        {
+          id: 2,
+          imageUrl: "https://placehold.co/1080x600/003366/FFFFFF/png?text=Best+Sellers",
+          heading: "Customer Favorites",
+          subheading: "The products our customers love the most"
+        }
+      ]
+    }
+  ];
+};
+
+// ===========================
+// DEALS DATA (Updated to use product IDs)
+// ===========================
 const dealsData = {
   'sampoorn-arogya': {
     title: 'Sampoorn Arogya Wellness Offer',
-    description: 'Unlock the full power of Ayurvedic healing with Sampoorn Arogya. Strengthen immunity, improve digestion, and boost vitality—now at 15% OFF for a limited time. Don’t miss your chance to feel your best, naturally.',
+    description: `Unlock the full power of Ayurvedic healing with Sampoorn Arogya. Strengthen immunity, improve digestion, and boost vitality—now at 15% OFF for a limited time. Don't miss your chance to feel your best, naturally.`,
     productIds: [1],
     discount: '15% OFF',
     banners: [
@@ -466,7 +579,7 @@ const dealsData = {
   },
   'psorigo': {
     title: 'PSORIGO Skin Care Bundle Deal',
-    description: 'Say goodbye to irritation and hello to smoother, calmer skin. Get the complete PSORIGO care set—Body Lotion, Wash & Oil—for one special price. Save big with 20% OFF and restore your skin’s natural balance.',
+    description: `Say goodbye to irritation and hello to smoother, calmer skin. Get the complete PSORIGO care set—Body Lotion, Wash & Oil—for one special price. Save big with 20% OFF and restore your skin's natural balance.`,
     productIds: [4, 5, 6],
     discount: '20% OFF',
     isBundle: true,
@@ -485,40 +598,9 @@ const dealsData = {
   }
 };
 
-
-// About page banner data
-const aboutBanner = [
-  {
-    id: 1,
-    imageUrl: "https://placehold.co/1080x600/e8f5e9/43a047?text=About+GlowGlaz",
-    heading: "About GlowGlaz",
-    subheading: "Natural wellness solutions for modern living"
-  },
-  {
-    id: 2,
-    imageUrl: "https://placehold.co/1080x600/e3f2fd/1e88e5?text=Our+Heritage",
-    heading: "Our Heritage",
-    subheading: "Blending ancient wisdom with modern science since 2015"
-  }
-];
-
-// Contact page banner data
-const contactBanner = [
-  {
-    id: 1,
-    imageUrl: "https://placehold.co/1080x600/e1f5fe/0288d1?text=Contact+GlowGlaz",
-    heading: "Contact Us",
-    subheading: "We're here to help with all your wellness needs"
-  },
-  {
-    id: 2,
-    imageUrl: "https://placehold.co/1080x600/e0f7fa/00bcd4?text=Customer+Support",
-    heading: "Customer Support",
-    subheading: "Get in touch with our dedicated support team"
-  }
-];
-
-// Contact page information data
+// ===========================
+// STATIC DATA (Keep as is)
+// ===========================
 const contactInfo = {
   location: {
     icon: "MapMarkerAlt",
@@ -564,7 +646,6 @@ const contactInfo = {
   }
 };
 
-// Product support categories
 const productSupport = [
   {
     title: "Ayurvedic Products",
@@ -586,7 +667,6 @@ const productSupport = [
   }
 ];
 
-// Contact page FAQs
 const contactFaqs = [
   {
     question: "What are your shipping timeframes?",
@@ -606,23 +686,6 @@ const contactFaqs = [
   }
 ];
 
-// FAQ page banner data
-const faqBanner = [
-  {
-    id: 1,
-    imageUrl: "https://placehold.co/1080x600/e8eaf6/3f51b5?text=Frequently+Asked+Questions",
-    heading: "Frequently Asked Questions",
-    subheading: "Find answers to common questions about our products and services"
-  },
-  {
-    id: 2,
-    imageUrl: "https://placehold.co/1080x600/f3e5f5/9c27b0?text=Help+Center",
-    heading: "Help Center",
-    subheading: "We're here to assist you with any questions you might have"
-  }
-];
-
-// FAQ categories and questions
 const faqData = [
   {
     category: "Product Information",
@@ -731,22 +794,6 @@ const faqData = [
         answer: "Yes, all payment information is encrypted using industry-standard SSL technology. We do not store your complete credit card information on our servers."
       }
     ]
-  }
-];
-
-// Shipping page banner data
-const shippingBanner = [
-  {
-    id: 1,
-    imageUrl: "https://placehold.co/1080x600/e8f5e9/43a047?text=Shipping+%26+Returns",
-    heading: "Shipping & Returns",
-    subheading: "Everything you need to know about our delivery and return policies"
-  },
-  {
-    id: 2,
-    imageUrl: "https://placehold.co/1080x600/e3f2fd/1e88e5?text=Customer+Satisfaction",
-    heading: "Customer Satisfaction Guaranteed",
-    subheading: "We want you to be completely satisfied with your purchase"
   }
 ];
 
@@ -886,22 +933,6 @@ const shippingFaqs = [
   {
     question: "What if my package is lost in transit?",
     answer: "If your tracking information hasn't updated for more than 5 business days or indicates the package is lost, please contact our customer support team. We'll file a claim with the shipping carrier and either send a replacement or provide a full refund."
-  }
-];
-
-// Privacy page banner data
-const privacyBanner = [
-  {
-    id: 1,
-    imageUrl: "https://placehold.co/1080x600/efeff9/6366f1?text=Privacy+Policy",
-    heading: "Privacy Policy",
-    subheading: "How we collect, use, and protect your personal information"
-  },
-  {
-    id: 2,
-    imageUrl: "https://placehold.co/1080x600/f0f9ff/2563eb?text=Data+Protection",
-    heading: "Data Protection",
-    subheading: "We're committed to safeguarding your personal information"
   }
 ];
 
@@ -1048,22 +1079,6 @@ const privacyPolicy = {
   ]
 };
 
-// Terms page banner data
-const termsBanner = [
-  { 
-    id: 1,
-    imageUrl: "https://placehold.co/1080x600/f3f4f6/6b7280?text=Terms+%26+Conditions",
-    heading: "Terms & Conditions",
-    subheading: "Please read our terms and conditions carefully before using our services"
-  },
-  {
-    id: 2,
-    imageUrl: "https://placehold.co/1080x600/eef2ff/4f46e5?text=Legal+Information",
-    heading: "Legal Information",
-    subheading: "Understanding your rights and our policies"
-  }
-];
-
 // Terms and conditions data
 const termsAndConditions = {
   lastUpdated: "December 1, 2023",
@@ -1187,28 +1202,41 @@ const termsAndConditions = {
     }
   ]
 };
+// [Include your existing faqData, shippingPolicy, returnPolicy, shippingFaqs, privacyPolicy, termsAndConditions arrays here - they remain unchanged]
 
-export default { 
-  trending, 
-  newproduct, 
-  brand, 
-  productData, 
-  trendingpage, 
-  productDetailData,
+// ===========================
+// MAIN EXPORT
+// ===========================
+export default {
+  // Main product database and functions
+  MAIN_PRODUCTS,
+  getProductById,
+  getProductsByIds,
+  getProductsByCategory,
+  getProductsByTag,
+  getProductsByBrand,
+  getAllProducts,
+  addProduct,
+  updateProduct,
+  
+  // Legacy arrays (now generated from main database)
+  trending: getTrending(),
+  newproduct: getNewProducts(),
+  brand: getBrands(),
+  productData: getProductData(),
+  productDetailData: getProductDetailData(),
+  trendingpage: getTrendingPageData(),
+  getItemOfWeekProducts: getItemOfWeekProducts(),
+  
+  // Static data
   dealsData,
-  aboutBanner,
-  contactBanner,
   contactInfo,
   productSupport,
   contactFaqs,
-  faqBanner,
-  faqData,
-  shippingBanner,
-  shippingPolicy,
-  returnPolicy,
-  shippingFaqs,
-  privacyBanner,
-  privacyPolicy,
-  termsBanner,
-  termsAndConditions
-}; 
+  faqData, // Include your existing faqData
+  shippingPolicy, // Include your existing shippingPolicy
+  returnPolicy, // Include your existing returnPolicy
+  shippingFaqs, // Include your existing shippingFaqs
+  privacyPolicy, // Include your existing privacyPolicy
+  termsAndConditions // Include your existing termsAndConditions
+};

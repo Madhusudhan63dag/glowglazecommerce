@@ -1,21 +1,118 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaShoppingCart, FaLock, FaShippingFast, FaCreditCard, FaArrowLeft, FaCheckCircle, FaShieldAlt, FaMedal, FaRegCreditCard, FaYoutube, FaEnvelope, FaBox, FaHeadset, FaPhone } from 'react-icons/fa';
+import { FaShoppingCart, FaLock, FaShippingFast, FaCreditCard, FaArrowLeft, FaCheckCircle, FaShieldAlt, FaMedal, FaRegCreditCard, FaEnvelope, FaBox, FaHeadset, FaPhone, FaMobileAlt, FaExclamationTriangle, FaTimes, FaInfoCircle } from 'react-icons/fa';
 import SEO from '../components/SEO';
+import API_main from '../utils/config/api';
 
-// Add backend API URL - Fixed to properly use environment variables or fallback
-const API_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000'); //https://razorpaybackend-wgbh.onrender.com
-// Add YouTube OAuth credentials - Updated to use OAuth 2.0 with proper Google Identity Services
-const YOUTUBE_CLIENT_ID = process.env.REACT_APP_YOUTUBE_CLIENT_ID || '672880894908-nlo53e5cevqpvc1r1j45s3h8mr8a7fdu.apps.googleusercontent.com';
-const YOUTUBE_CHANNEL_ID = 'UCZk0XVMUcmhAGf0L-V9rUxA'; // Your YouTube channel ID
-// Development verification code - should match backend DEV_VERIFICATION_CODE
-const DEV_VERIFICATION_CODE = 'devtest123';
+// Backend API URL
+const API_URL = API_main;
+
+// Custom Popup Component
+const CustomPopup = ({ isOpen, onClose, title, message, type = 'info', icon: CustomIcon }) => {
+  if (!isOpen) return null;
+
+  const getColors = () => {
+    switch (type) {
+      case 'success':
+        return 'border-green-500 bg-green-50';
+      case 'warning':
+        return 'border-yellow-500 bg-yellow-50';
+      case 'error':
+        return 'border-red-500 bg-red-50';
+      default:
+        return 'border-blue-500 bg-blue-50';
+    }
+  };
+
+  const getIconColor = () => {
+    switch (type) {
+      case 'success':
+        return 'text-green-600';
+      case 'warning':
+        return 'text-yellow-600';
+      case 'error':
+        return 'text-red-600';
+      default:
+        return 'text-blue-600';
+    }
+  };
+
+  const DefaultIcon = () => {
+    switch (type) {
+      case 'success':
+        return <FaCheckCircle />;
+      case 'warning':
+        return <FaExclamationTriangle />;
+      case 'error':
+        return <FaTimes />;
+      default:
+        return <FaInfoCircle />;
+    }
+  };
+
+  const IconComponent = CustomIcon || DefaultIcon;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className={`bg-white rounded-lg shadow-xl max-w-md w-full mx-4 border-l-4 ${getColors()}`}>
+        <div className="p-6">
+          <div className="flex items-start">
+            <div className={`flex-shrink-0 ${getIconColor()} text-2xl mr-4 mt-1`}>
+              <IconComponent />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+              <div className="text-gray-700 whitespace-pre-line">{message}</div>
+            </div>
+            <button
+              onClick={onClose}
+              className="flex-shrink-0 ml-4 text-gray-400 hover:text-gray-600"
+            >
+              <FaTimes />
+            </button>
+          </div>
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Checkout = () => {
   const { cart, cartTotal, formatPrice, clearCart } = useCart();
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); 
+  
+  // Popup state
+  const [popup, setPopup] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+    icon: null
+  });
+
+  const showPopup = (title, message, type = 'info', icon = null) => {
+    setPopup({
+      isOpen: true,
+      title,
+      message,
+      type,
+      icon
+    });
+  };
+
+  const closePopup = () => {
+    setPopup(prev => ({ ...prev, isOpen: false }));
+  };
 
   // Get user data from location state or localStorage
   const getUserData = () => {
@@ -36,33 +133,44 @@ const Checkout = () => {
     
     return {};
   };
-  
+
   const [formData, setFormData] = useState(getUserData);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [errors, setErrors] = useState({});
   
-  // Credit card form data
-  const [cardData, setCardData] = useState({
-    cardName: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-  });
+  // Phone number state (separate from formData for real-time validation)
+  const [phoneNumber, setPhoneNumber] = useState(formData.phone || '');
+  
+  // OTP verification states for COD
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
+  const [otpVerified, setOtpVerified] = useState(false);
+  
+  // NEW: Bypass verification state
+  const [verificationBypassed, setVerificationBypassed] = useState(false);
+  const [bypassReason, setBypassReason] = useState('');
   
   // Razorpay integration states
   const [razorpayOrder, setRazorpayOrder] = useState(null);
   const [razorpayKeyId, setRazorpayKeyId] = useState('');
   const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const [orderReference, setOrderReference] = useState('');
-  const [paymentId, setPaymentId] = useState('');
 
-  // Add states for YouTube subscription verification
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [verifyingSubscription, setVerifyingSubscription] = useState(false);
-  const [subscriptionError, setSubscriptionError] = useState('');
-  const [discountApplied, setDiscountApplied] = useState(false);
+  // Timer for OTP resend
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
 
   // Redirect if no shipping information
   useEffect(() => {
@@ -97,179 +205,208 @@ const Checkout = () => {
     });
   };
 
-  // Initialize using modern Google Identity Services
-  useEffect(() => {
-    console.log('Initializing Google Identity Services...');
+  // Calculate totals
+  const shippingCost = cartTotal >= 3000 ? 0 : 99;
+  const orderTotal = cartTotal + shippingCost;
+
+  // Validate phone number
+  const validatePhoneNumber = (phone) => {
+    const phoneRegex = /^[6-9]\d{9}$/; // Indian mobile number format
+    return phoneRegex.test(phone);
+  };
+
+  // Handle phone number change
+  const handlePhoneChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 10); // Only digits, max 10
+    setPhoneNumber(value);
     
-    const loadGoogleIdentityServices = () => {
-      return new Promise((resolve, reject) => {
-        // Check if script is already loaded
-        if (document.getElementById('google-identity-script')) {
-          console.log('Google Identity script already loaded');
-          resolve(true);
-          return;
-        }
-        
-        // Load the Google Identity script
-        const script = document.createElement('script');
-        script.id = 'google-identity-script';
-        script.src = 'https://accounts.google.com/gsi/client';
-        script.async = true;
-        script.defer = true;
-        
-        script.onload = () => {
-          console.log('Google Identity Services script loaded successfully');
-          resolve(true);
-        };
-        
-        script.onerror = (error) => {
-          console.error('Error loading Google Identity Services script:', error);
-          reject(error);
-        };
-        
-        document.body.appendChild(script);
+    // Clear phone error when user types
+    if (errors.phone) {
+      setErrors(prev => ({ ...prev, phone: '' }));
+    }
+    
+    // Reset OTP states if phone number changes
+    if (otpSent || otpVerified || verificationBypassed) {
+      setOtpSent(false);
+      setOtpVerified(false);
+      setShowOtpInput(false);
+      setOtp('');
+      setOtpError('');
+      setVerificationBypassed(false);
+      setBypassReason('');
+    }
+  };
+
+  // Send OTP for COD verification - WITH BYPASS ON ERROR
+  const sendOtp = async () => {
+    // Validate phone number first
+    if (!phoneNumber || !validatePhoneNumber(phoneNumber)) {
+      setErrors(prev => ({ ...prev, phone: 'Please enter a valid 10-digit mobile number' }));
+      return;
+    }
+
+    try {
+      setOtpError('');
+      setOtpSent(false);
+
+      // Using the correct API endpoint from your backend
+      const response = await fetch(`${API_URL}/generate-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber: phoneNumber // Match the parameter name from your API
+        }),
       });
-    };
-    
-    loadGoogleIdentityServices()
-      .catch(error => console.error('Failed to load Google Identity Services:', error));
-  }, []);
 
-  const handleCardDataChange = (e) => {
-    const { name, value } = e.target;
-    setCardData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when field is edited
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      const data = await response.json();
+
+      if (data.success) {
+        setOtpSent(true);
+        setShowOtpInput(true);
+        setResendTimer(60); // 60 seconds countdown
+        showPopup(
+          'OTP Sent Successfully!',
+          'Please check your phone for the verification code.',
+          'success',
+          FaCheckCircle
+        );
+      } else {
+        // BYPASS: If OTP generation fails, bypass verification
+        console.warn('OTP generation failed, bypassing verification:', data.message);
+        setVerificationBypassed(true);
+        setBypassReason('OTP service temporarily unavailable');
+        setFormData(prev => ({ ...prev, phone: phoneNumber }));
+        showPopup(
+          'SMS Service Unavailable',
+          'SMS service is temporarily unavailable. Your order will proceed without phone verification.',
+          'warning',
+          FaExclamationTriangle
+        );
+      }
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      
+      // BYPASS: On network/server error, bypass verification
+      console.warn('OTP generation error, bypassing verification');
+      setVerificationBypassed(true);
+      setBypassReason('Network error during verification');
+      setFormData(prev => ({ ...prev, phone: phoneNumber }));
+      setOtpError('');
+      showPopup(
+        'Technical Issue',
+        'Unable to send verification code due to technical issues. Your order will proceed without phone verification.',
+        'warning',
+        FaExclamationTriangle
+      );
     }
   };
 
-  const validatePaymentForm = () => {
-    const newErrors = {};
-    
-    if (paymentMethod === 'card') {
-      if (!cardData.cardName.trim()) newErrors.cardName = 'Name on card is required';
-      if (!cardData.cardNumber.trim()) {
-        newErrors.cardNumber = 'Card number is required';
-      } else if (!/^\d{16}$/.test(cardData.cardNumber.replace(/\s/g, ''))) {
-        newErrors.cardNumber = 'Invalid card number';
-      }
-      if (!cardData.expiryDate.trim()) {
-        newErrors.expiryDate = 'Expiry date is required';
-      } else if (!/^\d{2}\/\d{2}$/.test(cardData.expiryDate)) {
-        newErrors.expiryDate = 'Use format MM/YY';
-      }
-      if (!cardData.cvv.trim()) {
-        newErrors.cvv = 'CVV is required';
-      } else if (!/^\d{3,4}$/.test(cardData.cvv)) {
-        newErrors.cvv = 'Invalid CVV';
-      }
+  // Verify OTP
+  const verifyOtp = async () => {
+    if (!otp || otp.length !== 4) { // Your API generates 4-digit OTP
+      setOtpError('Please enter a valid 4-digit OTP');
+      return;
     }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    try {
+      setOtpVerifying(true);
+      setOtpError('');
+
+      // Using the correct API endpoint from your backend
+      const response = await fetch(`${API_URL}/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber: phoneNumber, // Match the parameter name from your API
+          otp: otp
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setOtpVerified(true);
+        setShowOtpInput(false);
+        // Update formData with verified phone number
+        setFormData(prev => ({ ...prev, phone: phoneNumber }));
+        showPopup(
+          'Phone Verified Successfully!',
+          'Your phone number has been verified. You can now place your COD order.',
+          'success',
+          FaCheckCircle
+        );
+      } else {
+        setOtpError(data.message || 'Invalid OTP. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      setOtpError('Failed to verify OTP. Please try again.');
+    } finally {
+      setOtpVerifying(false);
+    }
   };
 
-  // Handle YouTube authentication and subscription verification
-  const handleVerifyYoutubeSubscription = async () => {
-    setVerifyingSubscription(true);
-    setSubscriptionError('');
+  // Process COD order - UPDATED to handle bypass
+  const processCodOrder = async () => {
+    // Check if either verified OR bypassed
+    if (!otpVerified && !verificationBypassed) {
+      setOtpError('Please verify your phone number first');
+      return;
+    }
+
+    setIsSubmitting(true);
     
     try {
-      // Development mode for testing (remove in production)
-      const isDev = process.env.NODE_ENV === 'development';
-      if (isDev) {
-        console.log('Using development mode verification');
-        // Add dev mode bypass for testing
-        const response = await fetch(`${API_URL}/verify-youtube-subscription`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            devMode: true,
-            verificationCode: DEV_VERIFICATION_CODE,
-          }),
-        });
-        
-        const data = await response.json();
-        console.log('Development mode verification response:', data);
-        
-        if (data.success && data.isSubscribed) {
-          setIsSubscribed(true);
-          setDiscountApplied(true);
-          setVerifyingSubscription(false);
-          return;
-        }
-      }
-
-      // Regular flow for production using Google Identity Services
-      if (!window.google) {
-        console.error("Google Identity Services not loaded");
-        setSubscriptionError("Authentication service not available. Please try again later.");
-        setVerifyingSubscription(false);
-        return;
-      }
+      // Generate order reference
+      const orderRef = `GG-${Math.floor(100000 + Math.random() * 900000)}`;
       
-      // Use the new Google Identity OAuth2 flow
-      const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: YOUTUBE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/youtube.readonly',
-        callback: async (tokenResponse) => {
-          if (tokenResponse.error) {
-            console.error('Google OAuth error:', tokenResponse);
-            setSubscriptionError('Authentication failed. Please try again.');
-            setVerifyingSubscription(false);
-            return;
-          }
-          
-          // Got the access token
-          const accessToken = tokenResponse.access_token;
-          
-          try {
-            // Call backend to verify subscription
-            const response = await fetch(`${API_URL}/verify-youtube-subscription`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                accessToken,
-                channelId: YOUTUBE_CHANNEL_ID,
-              }),
-            });
-            
-            const data = await response.json();
-            
-            if (data.success && data.isSubscribed) {
-              setIsSubscribed(true);
-              setDiscountApplied(true);
-            } else {
-              setSubscriptionError(data.message || 'Not subscribed to the channel. Subscribe to get a 10% discount!');
-            }
-          } catch (error) {
-            console.error('Error verifying subscription with backend:', error);
-            setSubscriptionError('Failed to verify subscription. Please try again.');
-          } finally {
-            setVerifyingSubscription(false);
-          }
-        },
-      });
+      // Set order success flag
+      sessionStorage.setItem('orderSuccessful', 'true');
       
-      // Request the access token
-      client.requestAccessToken();
+      // Send order confirmation email with updated formData that includes phone
+      const updatedFormData = { ...formData, phone: phoneNumber };
+      await sendOrderConfirmationEmail(orderRef, 'COD', updatedFormData);
       
+      // Clear cart and pending checkout data
+      clearCart();
+      localStorage.removeItem('pendingCheckout');
+      
+      // Create order data for ThankYou page
+      const orderData = {
+        orderReference: orderRef,
+        paymentId: 'COD',
+        formData: updatedFormData,
+        paymentMethod,
+        cartItems: [...cart],
+        cartTotal,
+        orderTotal,
+        shippingCost,
+        discountAmount: 0,
+        discountApplied: false,
+        // Add bypass info if applicable
+        ...(verificationBypassed && { 
+          verificationBypassed: true, 
+          bypassReason: bypassReason 
+        })
+      };
+      
+      // Store in localStorage
+      localStorage.setItem('lastCompletedOrder', JSON.stringify(orderData));
+      
+      // Navigate to thank you page
+      window.location.href = `/thank-you?ref=${orderRef}`;
     } catch (error) {
-      console.error('Error in YouTube verification process:', error);
-      setSubscriptionError('Failed to verify subscription. Please try again.');
-      setVerifyingSubscription(false);
+      console.error('Error processing COD order:', error);
+      showPopup(
+        'Order Processing Failed',
+        'Failed to process order. Please try again.',
+        'error'
+      );
+      setIsSubmitting(false);
     }
   };
 
@@ -285,7 +422,7 @@ const Checkout = () => {
         notes: {
           customerName: `${formData.firstName} ${formData.lastName}`,
           customerEmail: formData.email,
-          customerPhone: formData.phone,
+          customerPhone: phoneNumber || formData.phone,
         }
       };
       
@@ -308,7 +445,11 @@ const Checkout = () => {
       }
     } catch (error) {
       console.error('Error creating order:', error);
-      alert('Failed to create order. Please try again.');
+      showPopup(
+        'Order Creation Failed',
+        'Failed to create order. Please try again.',
+        'error'
+      );
       setPaymentProcessing(false);
       return null;
     }
@@ -319,7 +460,11 @@ const Checkout = () => {
     const res = await loadRazorpayScript();
     
     if (!res) {
-      alert('Razorpay SDK failed to load. Please check your internet connection.');
+      showPopup(
+        'Payment Gateway Error',
+        'Razorpay SDK failed to load. Please check your internet connection.',
+        'error'
+      );
       setPaymentProcessing(false);
       return;
     }
@@ -332,7 +477,6 @@ const Checkout = () => {
       description: 'Thank you for your purchase!',
       order_id: orderData.order.id,
       handler: async function (response) {
-        // Handle payment success directly here instead of calling another function
         try {
           setIsSubmitting(true);
           console.log("Razorpay payment successful, verifying payment...");
@@ -364,8 +508,9 @@ const Checkout = () => {
             // Set order complete state
             setOrderComplete(true);
             
-            // Send order confirmation email
-            await sendOrderConfirmationEmail(orderRef, response.razorpay_payment_id);
+            // Send order confirmation email with phone number
+            const updatedFormData = { ...formData, phone: phoneNumber || formData.phone };
+            await sendOrderConfirmationEmail(orderRef, response.razorpay_payment_id, updatedFormData);
             
             // Clear cart and pending checkout data
             clearCart();
@@ -375,37 +520,44 @@ const Checkout = () => {
             const orderData = {
               orderReference: orderRef,
               paymentId: response.razorpay_payment_id,
-              formData,
+              formData: updatedFormData,
               paymentMethod,
               cartItems: [...cart],
               cartTotal,
               orderTotal,
               shippingCost,
-              discountAmount,
-              discountApplied
+              discountAmount: 0,
+              discountApplied: false
             };
             
             // Store in localStorage as fallback
             localStorage.setItem('lastCompletedOrder', JSON.stringify(orderData));
             console.log("Order data saved to localStorage, redirecting...");
             
-            // Use direct URL navigation with query parameter as the most reliable method
-            // This will work even if React Router state is lost in the process
+            // Use direct URL navigation with query parameter
             window.location.href = `/thank-you?ref=${orderRef}`;
           } else {
-            alert('Payment verification failed. Please contact support.');
+            showPopup(
+              'Payment Verification Failed',
+              'Payment verification failed. Please contact support.',
+              'error'
+            );
             setIsSubmitting(false);
           }
         } catch (error) {
           console.error('Payment verification error:', error);
-          alert('Payment verification failed. Please contact support.');
+          showPopup(
+            'Payment Verification Error',
+            'Payment verification failed. Please contact support.',
+            'error'
+          );
           setIsSubmitting(false);
         }
       },
       prefill: {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
-        contact: formData.phone,
+        contact: phoneNumber || formData.phone,
       },
       notes: {
         address: formData.address
@@ -413,7 +565,6 @@ const Checkout = () => {
       theme: {
         color: '#4CAF50'
       },
-      // Add modal closing callback to handle edge cases
       modal: {
         ondismiss: function() {
           console.log('Razorpay modal closed');
@@ -427,410 +578,159 @@ const Checkout = () => {
       const paymentObject = new window.Razorpay(options);
       paymentObject.on('payment.failed', function (response) {
         console.error('Payment failed:', response.error);
-        alert(`Payment failed: ${response.error.description}`);
+        showPopup(
+          'Payment Failed',
+          `Payment failed: ${response.error.description}`,
+          'error'
+        );
         setPaymentProcessing(false);
         setIsSubmitting(false);
       });
       paymentObject.open();
     } catch (error) {
       console.error('Error opening Razorpay:', error);
-      alert('Failed to open payment gateway. Please try again.');
+      showPopup(
+        'Payment Gateway Error',
+        'Failed to open payment gateway. Please try again.',
+        'error'
+      );
       setPaymentProcessing(false);
       setIsSubmitting(false);
     }
   };
 
-  // Send order confirmation email - with improved error handling
-  const sendOrderConfirmationEmail = async (orderNumber, paymentId) => {
+  // Send order confirmation email - Updated to match API structure
+  const sendOrderConfirmationEmail = async (orderRef, paymentId, customerFormData = formData) => {
     try {
-      // Format cart items into a proper products array structure for the email API
-      const products = cart.map(item => ({
-        name: item.title,
-        quantity: item.quantity,
-        price: (typeof item.price === 'number') ? item.price.toFixed(2) : item.price,
-        image: item.image
-      }));
-      
-      const orderDetails = {
-        orderNumber,
-        products, // Send structured products array instead of just names
-        totalAmount: orderTotal,
-        currency: '₹',
-        paymentMethod: paymentMethod === 'razorpay' ? 'Razorpay' : (paymentMethod === 'card' ? 'Credit Card' : 'Cash on Delivery'),
-        paymentId: paymentId || 'COD',
-        discount: discountApplied ? '10% YouTube Subscriber Discount' : 'No discount applied'
+      // Structure data according to API requirements
+      const emailData = {
+        customerEmail: customerFormData.email,
+        orderDetails: {
+          orderNumber: orderRef,
+          products: cart.map(item => ({
+            name: item.title,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          totalAmount: orderTotal,
+          currency: "₹",
+          paymentMethod: paymentMethod === 'razorpay' ? 'Online Payment' : 'Cash on Delivery',
+          paymentId: paymentId
+        },
+        customerDetails: {
+          firstName: customerFormData.firstName,
+          lastName: customerFormData.lastName,
+          email: customerFormData.email,
+          phone: customerFormData.phone,
+          address: customerFormData.address,
+          apartment: customerFormData.apartment || '',
+          city: customerFormData.city,
+          state: customerFormData.state,
+          zip: customerFormData.pincode,
+          country: customerFormData.country || 'India'
+        }
       };
-      
-      const customerDetails = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.pincode
-      };
-      
-      // Log the API URL being used (for debugging)
-      console.log(`Attempting to send order confirmation email to API: ${API_URL}`);
-      
-      // Use Promise.race with a timeout instead of AbortController
-      const emailPromise = fetch(`${API_URL}/send-order-confirmation`, {
+
+      console.log('Sending order confirmation email with data:', emailData);
+
+      const response = await fetch(`${API_URL}/send-order-confirmation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          customerEmail: formData.email,
-          orderDetails,
-          customerDetails
-        })
+        body: JSON.stringify(emailData),
       });
+
+      const result = await response.json();
+      if (!result.success) {
+        console.error('Failed to send order confirmation email:', result.message);
+        
+        // Show popup for email failure
+        showPopup(
+          'Order Placed Successfully!',
+          `Order Number: ${orderRef}\n\nHowever, we couldn't send your confirmation email due to technical issues.\n\n📞 For order updates, please contact us:\n• Phone: +91 12345 67890\n• Email: support@glowglaz.com\n• WhatsApp: +91 98765 43210\n\nPlease save your order number: ${orderRef}`,
+          'warning',
+          FaExclamationTriangle
+        );
+      } else {
+        console.log('Order confirmation email sent successfully');
+      }
+    } catch (error) {
+      console.error('Error sending order confirmation email:', error);
       
-      // Create a timeout promise
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 15000)
+      // Show popup for email sending error
+      showPopup(
+        'Order Placed Successfully!',
+        `Order Number: ${orderRef}\n\nHowever, we couldn't send your confirmation email due to network issues.\n\n📞 For order updates and confirmation, please contact us:\n• Phone: +91 12345 67890\n• Email: support@glowglaz.com\n• WhatsApp: +91 98765 43210\n\nPlease save your order number: ${orderRef}\n\nWe will manually send you the order details within 2 hours.`,
+        'warning',
+        FaExclamationTriangle
       );
-      
-      // Race the email request against the timeout
-      const response = await Promise.race([emailPromise, timeoutPromise]);
-      
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log("Email confirmation response:", data);
-      
-      return data;
-    } catch (error) {
-      console.error('Error sending confirmation email:', error.message || error);
-      
-      // Store the order data locally as a fallback
-      try {
-        const emailData = {
-          customerEmail: formData.email,
-          orderDetails: {
-            orderNumber,
-            productNames: cart.map(item => item.title).join(', '),
-            quantity: cart.reduce((total, item) => total + item.quantity, 0),
-            totalAmount: orderTotal,
-            paymentMethod,
-            paymentId
-          },
-          customerDetails: { ...formData },
-          timestamp: new Date().toISOString()
-        };
-        
-        // Save to localStorage as a fallback
-        const pendingEmails = JSON.parse(localStorage.getItem('pendingOrderEmails') || '[]');
-        pendingEmails.push(emailData);
-        localStorage.setItem('pendingOrderEmails', JSON.stringify(pendingEmails));
-        
-        console.log('Order details saved locally for retry later');
-      } catch (storageError) {
-        console.error('Failed to save order details locally:', storageError);
-      }
-      
-      // Don't block the order completion flow because of email issues
-      return { success: false, error: error.message };
     }
   };
 
-  // Similar improvements for abandoned cart email function
-  const sendAbandonedCartEmail = async () => {
-    try {
-      if (!formData.email) return;
-      
-      // Format cart items into a proper products array structure for the email API
-      const products = cart.map(item => ({
-        name: item.title,
-        quantity: item.quantity,
-        price: (typeof item.price === 'number') ? item.price.toFixed(2) : item.price,
-        image: item.image
-      }));
-      
-      const orderDetails = {
-        orderNumber: `PENDING-${Date.now()}`,
-        products, // Send structured products array instead of just names
-        totalAmount: orderTotal,
-        currency: '₹'
-      };
-      
-      const customerDetails = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.pincode
-      };
-      
-      // Use direct fetch without AbortController
-      const response = await fetch(`${API_URL}/send-abandoned-order-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerEmail: formData.email,
-          orderDetails,
-          customerDetails
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log("Abandoned cart email response:", data);
-      
-      return data;
-    } catch (error) {
-      console.warn('Error sending abandoned cart email:', error.message || error);
-      // Silent fail for abandoned cart emails - non-critical functionality
-    }
-  };
-
-  // Add a utility function to check API connection - with fixed error handling
-  const checkApiConnection = async () => {
-    try {
-      // Try a simple fetch without AbortController first
-      const response = await fetch(`${API_URL}/server-metrics`);
-      return response.ok;
-    } catch (error) {
-      console.warn('API connection check failed:', error.message);
-      // Return false but don't throw - allows checkout to proceed with fallbacks
-      return false;
-    }
-  };
-
-  // Check API connection when component mounts - with silent failure
-  useEffect(() => {
-    // Don't await here, let it run in background
-    checkApiConnection().then(isConnected => {
-      if (!isConnected) {
-        console.warn('Warning: Backend API seems to be unreachable. Some features may not work correctly.');
-      }
-    }).catch(() => {
-      // Silent catch to prevent unhandled promise rejections
-    });
-  }, []);
-
-  // Track potential abandoned cart when user leaves
-  useEffect(() => {
-    // Create a flag to track successful order completion
-    const orderSuccessFlag = sessionStorage.getItem('orderSuccessful');
-    
-    // Save cart data to localStorage for potential abandoned cart recovery
-    // Only if we don't have a successful order
-    if (cart.length > 0 && !orderSuccessFlag) {
-      localStorage.setItem('pendingCheckout', JSON.stringify({
-        cart,
-        formData,
-        timestamp: new Date().toISOString()
-      }));
-    }
-
-    // Clean up function to handle potential abandoned cart
-    return () => {
-      // We no longer need to send abandoned cart emails from Checkout.js
-      // since we already handle this in Auth.js when user leaves the shipping step
-      // This avoids duplicate abandoned cart emails
-      
-      // Just clean up pending checkout data if order was completed
-      if (orderComplete || sessionStorage.getItem('orderSuccessful')) {
-        localStorage.removeItem('pendingCheckout');
-      }
-    };
-  }, [formData, cart, orderComplete]);
-
-  const handleSubmitOrder = async (e) => {
+  // Handle form submission - UPDATED for bypass logic
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (validatePaymentForm()) {
-      setIsSubmitting(true);
-      
-      // Simple API check without AbortController
-      let isApiConnected = false;
-      try {
-        const response = await fetch(`${API_URL}/server-metrics`);
-        isApiConnected = response.ok;
-      } catch (error) {
-        console.warn('API check in order submission failed:', error.message);
-        // Continue with fallback behavior
+    // Validate phone number for all payment methods
+    if (!phoneNumber || !validatePhoneNumber(phoneNumber)) {
+      setErrors(prev => ({ ...prev, phone: 'Please enter a valid 10-digit mobile number' }));
+      return;
+    }
+    
+    if (paymentMethod === 'razorpay') {
+      // Create Razorpay order and display payment form
+      const orderData = await createRazorpayOrder();
+      if (orderData) {
+        await displayRazorpayPayment(orderData);
       }
-      
-      if (paymentMethod === 'razorpay') {
-        if (!isApiConnected) {
-          alert('Cannot connect to payment server. Please try another payment method or try again later.');
-          setIsSubmitting(false);
-          return;
-        }
-        
-        // Create Razorpay order and display payment form
-        const orderData = await createRazorpayOrder();
-        if (orderData) {
-          await displayRazorpayPayment(orderData);
-        } else {
-          setIsSubmitting(false);
-        }
-      } 
-      else if (paymentMethod === 'card') {
-        // Process card payment (simulated)
-        setTimeout(async () => {
-          // Generate a unique order reference/number
-          const orderRef = `GG-${Math.floor(100000 + Math.random() * 900000)}`;
-          setOrderReference(orderRef);
-          
-          // Set order success flag to prevent abandoned cart email
-          sessionStorage.setItem('orderSuccessful', 'true');
-          
-          // Set order complete state
-          setOrderComplete(true);
-          
-          // Send order confirmation email
-          await sendOrderConfirmationEmail(orderRef, 'CARD-PAYMENT');
-          
-          // Navigate to thank you page with all required data
-          navigate('/thank-you', {
-            state: {
-              orderReference: orderRef,
-              paymentId: 'CARD-PAYMENT',
-              formData,
-              paymentMethod,
-              cartItems: [...cart],
-              cartTotal,
-              orderTotal,
-              shippingCost,
-              discountAmount,
-              discountApplied
-            }
-          });
-          
-          setIsSubmitting(false);
-          clearCart();
-          localStorage.removeItem('pendingCheckout');
-        }, 2000);
-      }
-      else if (paymentMethod === 'cod') {
-        // Process cash on delivery
-        setTimeout(async () => {
-          // Generate a unique order reference/number
-          const orderRef = `GG-${Math.floor(100000 + Math.random() * 900000)}`;
-          setOrderReference(orderRef);
-          
-          // Set order success flag to prevent abandoned cart email
-          sessionStorage.setItem('orderSuccessful', 'true');
-          
-          // Set order complete state
-          setOrderComplete(true);
-          
-          // Send order confirmation email
-          await sendOrderConfirmationEmail(orderRef, 'COD');
-          
-          // Navigate to thank you page with all required data
-          navigate('/thank-you', {
-            state: {
-              orderReference: orderRef,
-              paymentId: 'COD',
-              formData,
-              paymentMethod,
-              cartItems: [...cart],
-              cartTotal,
-              orderTotal,
-              shippingCost,
-              discountAmount,
-              discountApplied
-            }
-          });
-          
-          setIsSubmitting(false);
-          clearCart();
-          localStorage.removeItem('pendingCheckout');
-        }, 1500);
+    } else if (paymentMethod === 'cod') {
+      // Handle Cash on Delivery with OTP verification OR bypass
+      if (!otpVerified && !verificationBypassed) {
+        // Send OTP first (will auto-bypass if fails)
+        await sendOtp();
+      } else {
+        // OTP already verified OR bypassed, process order
+        await processCodOrder();
       }
     }
   };
 
-  // Calculate shipping cost and total
-  const shippingCost = cartTotal > 3000 ? 0 : 99;
-  
-  // Calculate discount if applied
-  const discountAmount = discountApplied ? (cartTotal * 0.1) : 0;
-  
-  // Update order total with discount
-  const orderTotal = cartTotal + shippingCost - discountAmount;
-  
-  // Calculate estimated delivery date (5-7 days from now)
-  const getDeliveryDateRange = () => {
-    const start = new Date();
-    start.setDate(start.getDate() + 5);
-    const end = new Date();
-    end.setDate(end.getDate() + 7);
-    
-    const formatDate = (date) => {
-      return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-    };
-    
-    return `${formatDate(start)} - ${formatDate(end)}`;
-  };
+  if (orderComplete) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <FaCheckCircle className="text-green-500 text-6xl mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Order Processing...</h2>
+          <p className="text-gray-600">Please wait while we redirect you to the confirmation page.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SEO 
-        title="Secure Checkout - GlowGlaz"
-        description="Complete your purchase securely on GlowGlaz. Your personal and payment information is protected with our secure checkout process."
-        noindex={true}
+      <SEO title="Secure Checkout - GlowGlaz" description="Complete your order with our secure checkout process. Multiple payment options available." keywords="checkout, payment, secure, order, GlowGlaz" />
+
+      {/* Custom Popup */}
+      <CustomPopup
+        isOpen={popup.isOpen}
+        onClose={closePopup}
+        title={popup.title}
+        message={popup.message}
+        type={popup.type}
+        icon={popup.icon}
       />
-      
-      {/* Checkout Header & Progress */}
-      <div className="bg-white shadow-sm">
-        <div className="container mx-auto py-4 px-4">
-          <div className="flex items-center justify-between">
-            <button 
-              onClick={() => navigate('/shipping')} 
-              className="flex items-center text-gray-600 hover:text-gray-800"
-            >
-              <FaArrowLeft className="mr-2" />
-              <span>Back to Shipping</span>
-            </button>
-            <h1 className="text-xl font-bold text-center">Payment</h1>
-            <div></div> {/* Empty div for flex alignment */}
-          </div>
-        </div>
-      </div>
-      
-      {/* Progress Steps */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center max-w-2xl mx-auto">
-            <div className="flex flex-col items-center text-green-600">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
-                <FaShoppingCart />
-              </div>
-              <span className="text-xs mt-1">Cart</span>
-            </div>
-            <div className="flex-1 h-1 mx-2 bg-green-400"></div>
-            <div className="flex flex-col items-center text-green-600">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
-                <FaShippingFast />
-              </div>
-              <span className="text-xs mt-1">Shipping</span>
-            </div>
-            <div className="flex-1 h-1 mx-2 bg-green-400"></div>
-            <div className="flex flex-col items-center text-green-600">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
-                <FaCreditCard />
-              </div>
-              <span className="text-xs mt-1">Payment</span>
-            </div>
-          </div>
-        </div>
+
+      {/* Back Button */}
+      <div className="container mx-auto px-4 pt-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-600 hover:text-gray-800 mb-4"
+        >
+          <FaArrowLeft className="mr-2" />
+          Back
+        </button>
       </div>
 
       <div className="container mx-auto py-8 px-4">
@@ -870,303 +770,332 @@ const Checkout = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Payment Form */}
           <div className="lg:w-2/3">
-            {/* YouTube Subscription Discount Section - NEW */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-red-600">
-              <div className="flex items-center mb-4">
-                <FaYoutube className="text-red-600 text-2xl mr-3" />
-                <h2 className="text-xl font-semibold">Get 10% Off with YouTube Subscription</h2>
-              </div>
-              
-              <p className="text-gray-700 mb-4">
-                Subscribe to our YouTube channel and get an instant 10% discount on your order!
-              </p>
-              
-              {discountApplied ? (
-                <div className="bg-green-50 border border-green-200 rounded-md p-4 flex items-start">
-                  <FaCheckCircle className="text-green-600 mt-0.5 mr-2 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-green-700">YouTube Subscription Verified!</p>
-                    <p className="text-sm text-green-600">10% discount has been applied to your order.</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Follow these steps to get your discount:
-                  </p>
-                  <ol className="list-decimal list-inside text-sm text-gray-600 space-y-2 ml-2">
-                    <li>Click the "Verify Subscription" button below</li>
-                    <li>Sign in with your Google account</li>
-                    <li>Make sure you're subscribed to our channel</li>
-                    <li>Your discount will be applied automatically</li>
-                  </ol>
-                  
-                  {subscriptionError && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm text-yellow-800">
-                      {subscriptionError}
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center">
-                    <button
-                      onClick={handleVerifyYoutubeSubscription}
-                      disabled={verifyingSubscription}
-                      className="flex items-center bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors"
-                    >
-                      {verifyingSubscription ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Verifying...
-                        </>
-                      ) : (
-                        <>
-                          <FaYoutube className="mr-2" /> Verify Subscription
-                        </>
-                      )}
-                    </button>
-                    <a 
-                      href={`https://www.youtube.com/channel/${YOUTUBE_CHANNEL_ID}?sub_confirmation=1`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-4 text-sm text-red-600 hover:text-red-800 hover:underline"
-                    >
-                      Go to our channel
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-
+            {/* Contact Information */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
-              <div className="space-y-4">
-                <div className="flex flex-col space-y-4">
-                  
-                  {/* Add Razorpay payment option */}
-                  <label className="flex items-center p-4 border border-green-200 bg-green-50 rounded-md cursor-pointer hover:bg-green-100">
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      value="razorpay" 
-                      checked={paymentMethod === 'razorpay'} 
-                      onChange={() => setPaymentMethod('razorpay')}
-                      className="h-4 w-4 text-green-600"
-                    />
-                    <span className="ml-2 flex items-center">
-                      <img src="https://razorpay.com/favicon.png" alt="Razorpay" className="w-4 h-4 mr-2" />
-                      Pay with Razorpay (UPI, Cards, NetBanking, Wallets)
-                      <span className="ml-2 px-2 py-1 text-xs bg-green-600 text-white rounded-full">Recommended</span>
-                    </span>
-                  </label>
-                  
-                  <label className="flex items-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      value="cod" 
-                      checked={paymentMethod === 'cod'} 
-                      onChange={() => setPaymentMethod('cod')}
-                      className="h-4 w-4 text-green-600"
-                    />
-                    <span className="ml-2">Cash on Delivery</span>
-                  </label>
-                </div>
-                
-                
-                {/* Show Razorpay information */}
-                {paymentMethod === 'razorpay' && (
-                  <div className="mt-6 border-t pt-6">
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
-                      <p className="text-sm text-blue-800">
-                        You will be redirected to Razorpay's secure payment gateway to complete your purchase.
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-3 items-center justify-center">
-                      <img src="https://cdn.razorpay.com/static/assets/logo/upi.svg" alt="UPI" className="h-8" />
-                      <img src="https://cdn.razorpay.com/static/assets/logo/netbanking.svg" alt="Netbanking" className="h-8" />
-                      <img src="https://cdn.razorpay.com/static/assets/logo/card.svg" alt="Card" className="h-8" />
-                      <img src="https://cdn.razorpay.com/static/assets/logo/wallet.svg" alt="Wallet" className="h-8" />
-                    </div>
-                  </div>
-                )}
-                
-                {/* Show COD information */}
-                {paymentMethod === 'cod' && (
-                  <div className="mt-6 border-t pt-6">
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                      <p className="text-sm text-yellow-800">
-                        Pay with cash upon delivery. Please note that COD may not be available for all pin codes.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="mt-6 flex justify-between">
-                <button 
-                  onClick={() => navigate('/shipping')}
-                  className="border border-gray-300 text-gray-700 py-2 px-6 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  Back to Shipping
-                </button>
-                <button 
-                  onClick={handleSubmitOrder}
-                  className="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition-colors flex items-center"
-                  disabled={isSubmitting || paymentProcessing}
-                >
-                  {isSubmitting || paymentProcessing ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      {paymentProcessing ? 'Initializing Payment...' : 'Processing...'}
-                    </>
-                  ) : (
-                    paymentMethod === 'razorpay' ? 'Pay Now' : 'Place Order'
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Order Summary */}
-          <div className="lg:w-1/3">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24 border border-gray-200">
-              <h2 className="text-xl font-semibold mb-4 flex items-center border-b pb-3">
-                <FaShoppingCart className="mr-2 text-green-600" />
-                Order Summary
-                <span className="ml-2 text-sm bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{cart.length} item{cart.length !== 1 ? 's' : ''}</span>
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <FaPhone className="mr-2 text-blue-600" />
+                Contact Information
               </h2>
               
-              <div className="max-h-60 overflow-y-auto mb-4 pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                {cart.map(item => (
-                  <div key={item.id} className="flex py-3 border-b hover:bg-gray-50 rounded-md transition-colors">
-                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 bg-white p-1">
-                      <img 
-                        src={item.image} 
-                        alt={item.title} 
-                        className="h-full w-full object-contain object-center"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mobile Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={handlePhoneChange}
+                  placeholder="Enter your 10-digit mobile number"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.phone ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  maxLength={10}
+                />
+                {errors.phone && (
+                  <p className="text-red-600 text-sm mt-1">{errors.phone}</p>
+                )}
+                <p className="text-gray-500 text-sm mt-1">
+                  Required for order confirmation and delivery updates
+                  {paymentMethod === 'cod' && ' • Phone verification attempted for COD orders'}
+                </p>
+              </div>
+            </div>
+
+            {/* Payment Methods */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <FaCreditCard className="mr-2 text-blue-600" />
+                Payment Method
+              </h2>
+              
+              <div className="space-y-4">
+                {/* Razorpay Payment */}
+                <div className="border rounded-lg p-4">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="razorpay"
+                      checked={paymentMethod === 'razorpay'}
+                      onChange={(e) => {
+                        setPaymentMethod(e.target.value);
+                        // Reset OTP states when switching from COD
+                        setOtpVerified(false);
+                        setShowOtpInput(false);
+                        setOtpSent(false);
+                        setOtp('');
+                        setOtpError('');
+                        setVerificationBypassed(false);
+                        setBypassReason('');
+                      }}
+                      className="mr-3"
+                    />
+                    <div className="flex items-center">
+                      <FaRegCreditCard className="text-lg mr-2 text-blue-600" />
+                      <span className="font-medium">Credit/Debit Card, UPI, Net Banking</span>
+                    </div>
+                  </label>
+                  <p className="text-sm text-gray-600 ml-6 mt-1">Powered by Razorpay</p>
+                </div>
+
+                {/* Cash on Delivery */}
+                <div className="border rounded-lg p-4">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={paymentMethod === 'cod'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="mr-3"
+                    />
+                    <div className="flex items-center">
+                      <FaBox className="text-lg mr-2 text-green-600" />
+                      <span className="font-medium">Cash on Delivery</span>
+                    </div>
+                  </label>
+                  <p className="text-sm text-gray-600 ml-6 mt-1">
+                    Pay when you receive your order • Phone verification will be attempted
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* OTP Verification Section for COD */}
+            {paymentMethod === 'cod' && !otpVerified && !verificationBypassed && phoneNumber && validatePhoneNumber(phoneNumber) && (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-orange-500">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <FaMobileAlt className="mr-2 text-orange-600" />
+                  Phone Verification for COD
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  We'll attempt to verify your phone number: <strong>+91 {phoneNumber}</strong>
+                  <br />
+                  <small className="text-gray-500">If verification fails, your order will proceed without it.</small>
+                </p>
+                
+                {!showOtpInput ? (
+                  <button
+                    onClick={sendOtp}
+                    disabled={otpSent}
+                    className="bg-orange-600 hover:bg-orange-700 text-white py-2 px-6 rounded-lg font-medium disabled:opacity-50"
+                  >
+                    {otpSent ? 'Sending...' : 'Verify Phone Number'}
+                  </button>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Enter 4-digit OTP
+                      </label>
+                      <input
+                        type="text"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                        placeholder="Enter OTP"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-center text-2xl tracking-widest"
+                        maxLength={4}
                       />
                     </div>
-                    <div className="ml-4 flex flex-1 flex-col">
-                      <div className="flex justify-between text-sm font-medium text-gray-900">
-                        <h3 className="line-clamp-2 text-blue-700 hover:text-blue-800">{item.title}</h3>
-                      </div>
-                      <div className="flex mt-auto justify-between items-center">
-                        <div>
-                          <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
-                          <p className="text-xs text-gray-500 mt-1">Unit Price: {formatPrice(item.price)}</p>
-                        </div>
-                        <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
-                      </div>
+                    
+                    {otpError && (
+                      <p className="text-red-600 text-sm">{otpError}</p>
+                    )}
+                    
+                    <div className="flex gap-3">
+                      <button
+                        onClick={verifyOtp}
+                        disabled={!otp || otp.length !== 4 || otpVerifying}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                      >
+                        {otpVerifying ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Verifying...
+                          </>
+                        ) : (
+                          'Verify OTP'
+                        )}
+                      </button>
+                      
+                      <button
+                        onClick={sendOtp}
+                        disabled={resendTimer > 0}
+                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP'}
+                      </button>
                     </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Phone Verification Success for COD */}
+            {paymentMethod === 'cod' && otpVerified && (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-green-500">
+                <div className="flex items-center">
+                  <FaCheckCircle className="text-green-600 text-xl mr-3" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-800">Phone Number Verified!</h3>
+                    <p className="text-green-700">+91 {phoneNumber} • Ready to place COD order</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* NEW: Verification Bypassed Notice */}
+            {paymentMethod === 'cod' && verificationBypassed && (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-yellow-500">
+                <div className="flex items-center">
+                  <FaExclamationTriangle className="text-yellow-600 text-xl mr-3" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-yellow-800">Verification Skipped</h3>
+                    <p className="text-yellow-700">
+                      +91 {phoneNumber} • {bypassReason}
+                      <br />
+                      <small>Your COD order will proceed without phone verification.</small>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button - UPDATED for bypass logic */}
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={
+                isSubmitting || 
+                paymentProcessing || 
+                !phoneNumber || 
+                !validatePhoneNumber(phoneNumber) ||
+                (paymentMethod === 'cod' && !otpVerified && !verificationBypassed)
+              }
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {isSubmitting || paymentProcessing ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <FaLock className="mr-2" />
+                  {paymentMethod === 'cod' ? 
+                    (otpVerified ? 'Place COD Order' : 
+                     verificationBypassed ? 'Place COD Order (Unverified)' : 
+                     'Verify Phone to Continue') : 
+                    'Proceed to Payment'
+                  }
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Order Summary Sidebar - UPDATED for bypass status */}
+          <div className="lg:w-1/3">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <FaShoppingCart className="mr-2 text-blue-600" />
+                Order Summary
+              </h2>
+
+              {/* Cart Items */}
+              <div className="space-y-3 mb-4">
+                {cart.map((item, index) => (
+                  <div key={index} className="flex justify-between items-start border-b pb-2">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-sm line-clamp-2">{item.title}</h4>
+                      <p className="text-gray-600 text-sm">Qty: {item.quantity}</p>
+                    </div>
+                    <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
                   </div>
                 ))}
               </div>
-              
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between py-2 text-gray-700">
-                  <span>Subtotal ({cart.reduce((acc, item) => acc + item.quantity, 0)} items)</span>
-                  <span className="font-medium">{formatPrice(cartTotal)}</span>
+
+              {/* Pricing Details */}
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{formatPrice(cartTotal)}</span>
                 </div>
-                <div className="flex justify-between py-2 text-gray-700">
+                <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
+                  <span>{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
                 </div>
-                
-                {/* Add discount row if applied */}
-                {discountApplied && (
-                  <div className="flex justify-between py-2 text-green-600">
-                    <span className="flex items-center">
-                      <FaYoutube className="mr-1" />
-                      YouTube Discount (10%)
-                    </span>
-                    <span className="font-medium">-{formatPrice(discountAmount)}</span>
-                  </div>
-                )}
-                
-                {/* Estimated tax row */}
-                <div className="flex justify-between py-2 text-gray-700">
-                  <span className="flex items-center">
-                    <span>Estimated Tax</span>
-                    <span className="ml-1 text-xs text-gray-500">(Included)</span>
-                  </span>
-                  <span>₹0.00</span>
+                <div className="border-t pt-2 flex justify-between font-bold text-lg">
+                  <span>Total</span>
+                  <span>{formatPrice(orderTotal)}</span>
                 </div>
+              </div>
 
-                <div className="my-4 border-t border-b py-4">
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span className="text-green-700">{formatPrice(orderTotal)}</span>
-                  </div>
-                  <div className="mt-1 text-xs text-gray-500 text-right">
-                    Including GST and all applicable taxes
-                  </div>
+              {/* Phone Verification Status - UPDATED for bypass */}
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Phone Number:</span>
+                  {phoneNumber && validatePhoneNumber(phoneNumber) ? (
+                    <span className="text-green-600 text-sm">+91 {phoneNumber}</span>
+                  ) : (
+                    <span className="text-red-600 text-sm">Required</span>
+                  )}
                 </div>
-                
-                {/* Order details section */}
-                <div className="bg-gray-50 rounded-md p-3 space-y-2 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Payment Method</span>
-                    <span className="font-medium flex items-center">
-                      {paymentMethod === 'razorpay' && <img src="https://razorpay.com/favicon.png" alt="Razorpay" className="w-4 h-4 mr-1" />}
-                      {paymentMethod === 'card' && <FaCreditCard className="mr-1" />}
-                      {paymentMethod === 'cod' && <span className="mr-1">💵</span>}
-                      {paymentMethod === 'razorpay' ? 'Razorpay' : 
-                       paymentMethod === 'card' ? 'Credit Card' : 'Cash on Delivery'}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Estimated Delivery</span>
-                    <span className="font-medium">{getDeliveryDateRange()}</span>
-                  </div>
-                </div>
-                
-                {shippingCost === 0 && (
-                  <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded-md flex items-center">
-                    <FaShippingFast className="mr-2" />
-                    <span>Free shipping on orders over ₹3,000!</span>
-                  </div>
-                )}
-                
-                {/* Add YouTube discount badge if applied */}
-                {discountApplied && (
-                  <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-md flex items-center">
-                    <FaYoutube className="mr-2" />
-                    <span>10% YouTube subscriber discount applied!</span>
+                {paymentMethod === 'cod' && (
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-sm font-medium">COD Status:</span>
+                    {otpVerified ? (
+                      <span className="text-green-600 text-sm flex items-center">
+                        <FaCheckCircle className="mr-1" />
+                        Verified
+                      </span>
+                    ) : verificationBypassed ? (
+                      <span className="text-yellow-600 text-sm flex items-center">
+                        <FaExclamationTriangle className="mr-1" />
+                        Bypassed
+                      </span>
+                    ) : (
+                      <span className="text-orange-600 text-sm">Pending</span>
+                    )}
                   </div>
                 )}
               </div>
-              
-              {/* Trust Seals in Order Summary */}
-              <div className="mt-6 pt-4 border-t">
-                <div className="flex items-center justify-center mb-3">
-                  <FaLock className="text-green-600 mr-2" />
-                  <span className="text-sm font-medium text-gray-700">SECURE CHECKOUT</span>
-                </div>
-                <div className="flex flex-wrap justify-center gap-3 mb-4">
-                  <img src="https://cdn.iconscout.com/icon/free/png-256/visa-3-226460.png" alt="Visa" className="h-8" />
-                  <img src="https://cdn.iconscout.com/icon/free/png-256/mastercard-6-226462.png" alt="Mastercard" className="h-8" />
-                  <img src="https://cdn.iconscout.com/icon/free/png-256/american-express-44503.png" alt="Amex" className="h-8" />
-                  <img src="https://cdn.razorpay.com/static/assets/logo/upi.svg" alt="UPI" className="h-8" />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2 text-xs text-center mt-3">
-                  <div className="flex flex-col items-center border border-gray-200 rounded-md px-2 py-2 bg-gray-50">
-                    <FaShieldAlt className="text-green-600 mb-1" />
-                    <span className="text-gray-700">Secure Payment</span>
+
+              {/* Customer Support */}
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-medium mb-2 flex items-center">
+                  <FaHeadset className="mr-2 text-blue-600" />
+                  Need Help?
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center">
+                    <FaPhone className="mr-2 text-gray-400" />
+                    <span>+91 93922 77389</span>
                   </div>
-                  <div className="flex flex-col items-center border border-gray-200 rounded-md px-2 py-2 bg-gray-50">
-                    <FaMedal className="text-blue-600 mb-1" />
-                    <span className="text-gray-700">Quality Guarantee</span>
+                  <div className="flex items-center">
+                    <FaEnvelope className="mr-2 text-gray-400" />
+                    <span>customercareproductcenter@gmail.com</span>
                   </div>
                 </div>
               </div>
+
+              {/* Shipping Information */}
+              {formData && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <h3 className="font-medium mb-2 text-blue-800">Shipping To:</h3>
+                  <div className="text-sm text-blue-700">
+                    <p className="font-medium">{formData.firstName} {formData.lastName}</p>
+                    <p>{formData.address}</p>
+                    <p>{formData.city}, {formData.state} {formData.pincode}</p>
+                    {phoneNumber && <p>+91 {phoneNumber}</p>}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
