@@ -4,6 +4,7 @@ import { FaHeart, FaFacebookF, FaTwitter, FaPinterestP, FaGoogle, FaInstagram, F
 import productData from '../utils/data/product';
 import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
+import { generateProductSchema, generateBreadcrumbSchema } from '../utils/seo/schemaGenerator';
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -12,6 +13,13 @@ const ProductPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [product, setProduct] = useState(null);
   const { addToCart } = useCart();
+
+  // Generate schemas for the product
+  const productSchema = product ? generateProductSchema(product) : null;
+  const breadcrumbSchema = product ? generateBreadcrumbSchema(product) : null;
+  
+  // Combine schemas
+  const combinedSchema = product ? {...productSchema, ...breadcrumbSchema} : null;
 
   // Scroll to top when component mounts or when product id changes
   useEffect(() => {
@@ -57,9 +65,13 @@ const ProductPage = () => {
         title={`${product.title} - GlowGlaz`}
         description={product.whyLoveIt.substring(0, 160)}
         canonical={`https://glowglaz.com/product/${id}`}
+        type="product"
+        schema={combinedSchema}
         meta={{
           'og:image': product.images[0],
           'product:price:amount': parseFloat(product.price.replace(/[^\d.]/g, '')),
+          'product:price:currency': 'INR',
+          'product:availability': product.inStock ? 'in stock' : 'out of stock',
           'product:price:currency': 'INR',
         }}
       />

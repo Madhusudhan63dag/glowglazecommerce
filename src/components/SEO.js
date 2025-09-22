@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { generateOrganizationSchema } from '../utils/seo/schemaGenerator';
 
 /**
  * SEO component for managing all document head data
@@ -10,21 +11,32 @@ import { Helmet } from 'react-helmet-async';
  * @param {string} props.canonical - Canonical URL
  * @param {Object} props.meta - Additional meta tags
  * @param {boolean} props.noindex - Whether to add noindex meta tag
+ * @param {Object} props.schema - JSON-LD schema data
+ * @param {string} props.type - Page type (product, category, etc.)
  */
 const SEO = ({ 
   title = 'GlowGlaz - Ayurvedic & Natural Health Products', 
   description = 'Discover authentic Ayurvedic and natural health products at GlowGlaz. Shop our range of herbal supplements, skincare, and wellness solutions.', 
   canonical = '',
   meta = {},
-  noindex = false
+  noindex = false,
+  schema = null,
+  type = 'website'
 }) => {
   const metaData = {
     ...meta,
     'og:title': title,
     'og:description': description,
+    'og:type': type,
     'twitter:title': title,
     'twitter:description': description,
   };
+
+  // Get base organization schema
+  const baseSchema = generateOrganizationSchema();
+  
+  // Combine with provided schema if any
+  const schemas = schema ? [baseSchema, schema] : [baseSchema];
 
   return (
     <Helmet>
@@ -32,7 +44,7 @@ const SEO = ({
       <meta name="description" content={description} />
       
       {/* Open Graph / Facebook */}
-      <meta property="og:type" content="website" />
+      <meta property="og:type" content={type} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       {canonical && <meta property="og:url" content={canonical} />}
@@ -47,6 +59,13 @@ const SEO = ({
       
       {/* Add noindex tag if specified */}
       {noindex && <meta name="robots" content="noindex" />}
+      
+      {/* Add JSON-LD Schema */}
+      {schemas.map((schemaObj, index) => (
+        <script key={index} type="application/ld+json">
+          {JSON.stringify(schemaObj)}
+        </script>
+      ))}
       
       {/* Add additional meta tags */}
       {Object.entries(metaData).map(([name, content]) => (
